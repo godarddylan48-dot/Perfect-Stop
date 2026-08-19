@@ -1944,6 +1944,61 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  const v=q('.v181ver'); if(v)v.textContent='VERSION 24.6 • ACCUEIL COMPACT';
 })();
 </script>
+
+<style id="v247-chat-style">
+#v247ChatPanel{position:fixed;inset:0 0 68px 0;z-index:12000;background:radial-gradient(circle at 50% 0,#111b48,#030611 60%);display:none;color:#fff;font-family:system-ui;flex-direction:column}
+#v247ChatPanel.on{display:flex}.v247head{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px;border-bottom:1px solid #ffffff0d}.v247head h2{margin:0;font-size:20px}.v247close{border:0;border-radius:999px;background:#ffffff0d;color:#fff;width:38px;height:38px;font-size:20px}
+#v247Msgs{flex:1;overflow:auto;padding:12px 14px 8px}.v247msg{background:#ffffff07;border:1px solid #ffffff0b;border-radius:13px;padding:9px 10px;margin:7px 0;text-align:left}.v247msg.mine{background:#24150a;border-color:#9f5c0033}.v247meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px}.v247name{font-weight:900;color:#ffd45b}.v247time{font-size:10px;color:#ffffff55}.v247text{font-size:14px;line-height:1.35;word-break:break-word}.v247empty{color:#ffffff66;text-align:center;padding:30px 10px}
+.v247composer{padding:9px 10px 12px;border-top:1px solid #ffffff0d;background:#050817;display:grid;grid-template-columns:1fr auto;gap:8px}.v247input{min-width:0;border:1px solid #ffffff18;background:#ffffff0a;color:#fff;border-radius:13px;padding:12px;font-size:14px}.v247send{border:0;border-radius:13px;background:#9f5c00;color:#fff;font-weight:900;padding:0 15px}.v247hint{grid-column:1/-1;color:#ffffff55;font-size:10px;text-align:left;padding-left:3px}
+.v247badge{position:absolute;top:5px;right:calc(50% - 70px);min-width:16px;height:16px;border-radius:999px;background:#d92f42;color:white;font:900 10px/16px system-ui;text-align:center;padding:0 4px;display:none}
+@media(max-height:700px){#v247ChatPanel{inset-bottom:64px}.v247head{padding:10px 12px 7px}.v247composer{padding:7px 8px}.v247input{padding:10px}}
+</style>
+<div id="v247ChatPanel" aria-hidden="true">
+ <div class="v247head"><div><h2>💬 Chat général</h2><small style="color:#ffffff66">Discute avec les joueurs de Perfect Stop</small></div><button class="v247close" id="v247ChatClose">×</button></div>
+ <div id="v247Msgs"><div class="v247empty">Chargement des messages…</div></div>
+ <div class="v247composer"><input class="v247input" id="v247Input" maxlength="220" placeholder="Écris un message…"><button class="v247send" id="v247Send">Envoyer</button><div class="v247hint">220 caractères max • évite le spam et reste respectueux</div></div>
+</div>
+<script id="v247-chat">
+(()=>{
+ const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
+ const HD={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'};
+ const q=s=>document.querySelector(s),$=id=>document.getElementById(id);
+ const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+ const pid=()=>localStorage.psPid||'', pname=()=>localStorage.psName||'Joueur';
+ let open=false,lastIds='',lastSent=0,timer=null;
+ function when(ts){try{return new Date(ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}catch(e){return''}}
+ async function fetchMsgs(){
+   try{const r=await fetch(U+'/rest/v1/perfect_stop_chat?select=id,player_id,player_name,message,created_at&order=created_at.desc&limit=60',{headers:HD});if(!r.ok)throw 0;let a=await r.json();a=a.reverse();
+   const ids=a.map(x=>x.id).join(',');if(ids===lastIds)return;lastIds=ids;
+   $('v247Msgs').innerHTML=a.length?a.map(x=>`<div class="v247msg ${x.player_id===pid()?'mine':''}"><div class=v247meta><span class=v247name>${esc(x.player_name)}</span><span class=v247time>${when(x.created_at)}</span></div><div class=v247text>${esc(x.message)}</div></div>`).join(''):'<div class=v247empty>Aucun message pour le moment. Sois le premier 👋</div>';
+   $('v247Msgs').scrollTop=$('v247Msgs').scrollHeight;
+   }catch(e){$('v247Msgs').innerHTML='<div class=v247empty>Chat momentanément indisponible.</div>'}
+ }
+ async function send(){
+   const now=Date.now(),inp=$('v247Input'),msg=(inp.value||'').trim();
+   if(!pid()){alert('Choisis d’abord ton pseudo.');return}
+   if(!msg)return;if(msg.length>220)return;
+   if(now-lastSent<2500){alert('Attends quelques secondes avant de renvoyer un message.');return}
+   lastSent=now;$('v247Send').disabled=true;
+   try{const r=await fetch(U+'/rest/v1/perfect_stop_chat',{method:'POST',headers:{...HD,'Prefer':'return=minimal'},body:JSON.stringify({player_id:pid(),player_name:pname(),message:msg})});if(!r.ok)throw 0;inp.value='';lastIds='';await fetchMsgs()}catch(e){alert('Impossible d’envoyer le message. Réessaie.')}finally{$('v247Send').disabled=false}
+ }
+ function openChat(){open=true;$('v247ChatPanel').classList.add('on');$('v247ChatPanel').setAttribute('aria-hidden','false');lastIds='';fetchMsgs();clearInterval(timer);timer=setInterval(fetchMsgs,2500);setTimeout(()=>$('v247Input').focus(),150)}
+ function closeChat(){open=false;$('v247ChatPanel').classList.remove('on');$('v247ChatPanel').setAttribute('aria-hidden','true');clearInterval(timer)}
+ $('v247ChatClose').onclick=closeChat;$('v247Send').onclick=send;$('v247Input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+ // Add Chat as a fifth item in the bottom navigation.
+ const nav=q('#v22Nav');
+ if(nav&&!q('#v247ChatNav')){
+   nav.style.gridTemplateColumns='repeat(5,1fr)';
+   const b=document.createElement('button');b.id='v247ChatNav';b.className='v22navbtn';b.innerHTML='<span>💬</span>Chat';b.onclick=openChat;nav.appendChild(b)
+ }
+ // Fallback for versions where bottom nav has no id.
+ if(!q('#v247ChatNav')){
+   const bars=[...document.querySelectorAll('nav,.bottomnav,.nav')];const bar=bars.find(x=>/Accueil/i.test(x.textContent||'')&&/Compétition/i.test(x.textContent||''));
+   if(bar){const b=document.createElement('button');b.id='v247ChatNav';b.innerHTML='💬<br><small>Chat</small>';b.onclick=openChat;bar.appendChild(b)}
+ }
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 24.7 • CHAT EN DIRECT';
+})();
+</script>
 </body></html>
 <style id="v238-continuous-style">
 #v19BossHud{display:none!important}
