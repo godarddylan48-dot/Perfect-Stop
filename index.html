@@ -1,42 +1,166 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Perfect Stop V11.2</title><style>
-*{box-sizing:border-box;touch-action:manipulation}html,body{margin:0;height:100%;overflow:hidden}body{background:radial-gradient(circle at 50% 8%,#263763,#080a13 62%);color:#fff;font-family:system-ui;text-align:center}.w{height:100dvh;width:min(94vw,480px);margin:auto;padding:12px 16px 8px;display:flex;flex-direction:column}.top{display:flex;justify-content:space-between;font-size:12px;letter-spacing:2px}.lvl{margin:7px 0 3px;color:#ffd45b;font-size:14px}.track{display:flex;gap:5px;margin:3px 0 7px}.dot{height:5px;flex:1;background:#ffffff16;border-radius:9px}.done{background:#ffd45b}.goalText{opacity:.55;font-size:11px}.goal{font-size:clamp(34px,6.5vh,50px);font-weight:900;line-height:1}.timer{font-size:clamp(52px,11vh,82px);font-weight:900;font-variant-numeric:tabular-nums;line-height:1;margin:clamp(9px,2.1vh,18px) 0;transition:.2s}.hide{opacity:0}.btn{width:100%;padding:clamp(12px,2.2vh,17px);border:0;border-radius:17px;background:#fff;color:#10131e;font-size:21px;font-weight:900}.result{min-height:52px;padding-top:8px;font-size:clamp(16px,2.5vh,20px);font-weight:800}.direction{display:block;font-size:12px;margin-top:2px;opacity:.7}.cards{display:flex;gap:6px}.card{flex:1;padding:6px 2px;background:#ffffff0b;border:1px solid #ffffff13;border-radius:11px;font-size:8px}.card b{display:block;font-size:14px;color:#ffd45b}.hint{margin:4px 0;font-size:10px;opacity:.5}.daily{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#ffffff09;border:1px solid #ffffff10;border-radius:11px;padding:7px 9px;margin:5px 0;font-size:10px;text-align:left}.daily b{color:#ffd45b}.badge{padding:4px 7px;border-radius:999px;background:#ffffff10;font-size:9px}.badge.ok{background:#1d5f35;color:#baf4c9}.board{margin-top:auto;background:#ffffff09;border:1px solid #ffffff10;border-radius:12px;padding:7px 9px;text-align:left;font-size:10px}.tabs{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:4px}.tab{border:0;border-radius:8px;padding:5px 8px;background:#ffffff10;color:#aaa;font-weight:800;font-size:9px}.tab.on{background:#ffd45b;color:#171717}.rows{display:grid;grid-template-columns:1fr auto;gap:2px 8px;min-height:34px}.rows b{color:#ffd45b}.perfect{color:#ffd45b;font-size:27px}.record{color:#7fffb0;font-size:12px;display:block;margin-top:2px}.streak{color:#ffae35}.overlay{position:fixed;inset:0;background:#080a13f5;display:none;place-items:center;z-index:9;padding:20px}.overlay.show{display:grid}.box{width:min(90vw,390px);background:#101526;border:1px solid #ffffff15;border-radius:22px;padding:24px}.box h1{margin:0 0 8px}.box p{opacity:.7}.input{width:100%;padding:14px;border-radius:12px;border:1px solid #ffffff22;background:#ffffff0b;color:#fff;font-size:18px;text-align:center;margin:10px 0}.msg{min-height:24px;color:#ff9b9b;font-size:13px}.smallbtn{border:0;border-radius:8px;padding:6px 9px;background:#ffffff10;color:#ddd;font-size:9px}@media(max-height:700px){.timer{margin:6px 0}.result{min-height:43px}.daily{padding:5px 8px}.board{font-size:9px}.hint{display:none}}</style></head><body>
-<main class="w">
-<div class="top"><b>PERFECT STOP</b><span>🏆 <b id="points">0</b></span></div>
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#081126">
+<title>Perfect Stop V12</title>
+<style>
+*{box-sizing:border-box;touch-action:manipulation}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:radial-gradient(circle at 50% 7%,#263763,#080a13 62%);color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;text-align:center}
+.w{height:100dvh;width:min(94vw,500px);margin:auto;padding:10px 14px 8px;display:flex;flex-direction:column;position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:2px}
+.rankchip{letter-spacing:0;background:#ffffff0b;border:1px solid #ffffff13;border-radius:999px;padding:4px 8px;font-size:9px}
+.lvl{margin:7px 0 3px;color:#ffd45b;font-size:14px}
+.track{display:flex;gap:5px;margin:3px 0 5px}.dot{height:5px;flex:1;background:#ffffff16;border-radius:9px}.done{background:#ffd45b}.current{box-shadow:0 0 8px #ffd45b66}
+.goalText{opacity:.55;font-size:11px}.goal{font-size:clamp(34px,6.2vh,49px);font-weight:900;line-height:1}
+.timer{font-size:clamp(52px,10.5vh,82px);font-weight:900;font-variant-numeric:tabular-nums;line-height:1;margin:clamp(8px,1.9vh,16px) 0;transition:.2s}
+.hide{opacity:0}.btn{width:100%;padding:clamp(12px,2.1vh,16px);border:0;border-radius:17px;background:#fff;color:#10131e;font-size:21px;font-weight:900}
+.btn:active{transform:scale(.99)}.result{min-height:48px;padding-top:7px;font-size:clamp(15px,2.3vh,19px);font-weight:800}.direction{display:block;font-size:11px;margin-top:2px;opacity:.68}
+.cards{display:flex;gap:6px}.card{flex:1;padding:6px 2px;background:#ffffff0b;border:1px solid #ffffff13;border-radius:11px;font-size:8px}.card b{display:block;font-size:14px;color:#ffd45b}
+.xpbar{height:7px;background:#ffffff12;border-radius:999px;overflow:hidden;margin-top:6px}.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#ffd45b,#ff9b2f);width:0%}
+.metarow{display:grid;grid-template-columns:1.25fr .75fr;gap:6px;margin-top:5px}
+.daily,.achievement{background:#ffffff09;border:1px solid #ffffff10;border-radius:11px;padding:6px 8px;font-size:9px;text-align:left}
+.daily{display:flex;align-items:center;justify-content:space-between;gap:6px}.daily b,.achievement b{color:#ffd45b}.badge{padding:4px 6px;border-radius:999px;background:#ffffff10;font-size:8px;white-space:nowrap}.badge.ok{background:#1d5f35;color:#baf4c9}
+.progressText{font-size:9px;opacity:.5;margin:4px 0}
+.board{margin-top:auto;background:#ffffff09;border:1px solid #ffffff10;border-radius:12px;padding:7px 9px;text-align:left;font-size:10px}.tabs{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:4px}.tab{border:0;border-radius:8px;padding:5px 7px;background:#ffffff10;color:#aaa;font-weight:800;font-size:8px}.tab.on{background:#ffd45b;color:#171717}.rows{display:grid;grid-template-columns:1fr auto;gap:2px 8px;min-height:32px}.rows b{color:#ffd45b}
+.perfect{color:#ffd45b;font-size:25px}.record{color:#7fffb0;font-size:11px;display:block;margin-top:2px}.streak{color:#ffae35}
+.overlay{position:fixed;inset:0;background:#080a13f5;display:none;place-items:center;z-index:9;padding:20px}.overlay.show{display:grid}
+.box{width:min(90vw,400px);background:#101526;border:1px solid #ffffff15;border-radius:22px;padding:22px}.box h1{margin:0 0 7px}.box p{opacity:.72}.input{width:100%;padding:13px;border-radius:12px;border:1px solid #ffffff22;background:#ffffff0b;color:#fff;font-size:18px;text-align:center;margin:10px 0}.msg{min-height:22px;color:#ff9b9b;font-size:13px}.smallbtn{border:0;border-radius:8px;padding:5px 8px;background:#ffffff10;color:#ddd;font-size:8px}
+.finishStats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0}.finishStats div{background:#ffffff0b;border-radius:12px;padding:10px 4px}.finishStats b{display:block;color:#ffd45b;font-size:20px}
+.trophyGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}.trophy{background:#ffffff0b;border-radius:10px;padding:8px 3px;font-size:9px;opacity:.45}.trophy.on{opacity:1;border:1px solid #ffd45b44}
+.flash{animation:flash .45s ease}.shake{animation:shake .3s ease}
+@keyframes flash{0%{filter:brightness(1)}45%{filter:brightness(1.8)}100%{filter:brightness(1)}}@keyframes shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-5px)}60%{transform:translateX(5px)}}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}.confetti i{position:absolute;top:-20px;width:8px;height:14px;background:#fff;animation:fall 1.8s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.7}}
+@media(max-height:700px){.timer{margin:5px 0}.result{min-height:40px}.metarow{display:none}.board{font-size:9px}.progressText{display:none}}
+</style></head><body>
+<main class="w" id="app">
+<div class="top"><b>PERFECT STOP</b><span class="rankchip" id="rankChip">BRONZE • 0 XP</span><span>🏆 <b id="points">0</b></span></div>
 <div class="lvl" id="lvl"></div><div class="track" id="track"></div>
 <div class="goalText">ARRÊTE LE TEMPS À</div><div class="goal" id="goal">10.00</div>
-<div class="timer" id="timer">0.000</div><button class="btn" id="btn">START</button>
+<div class="timer" id="timer">0.000</div>
+<button class="btn" id="btn">START</button>
 <div class="result" id="result">Atteins le niveau 5.</div>
-<div class="cards"><div class="card"><b id="runBest">—</b>MEILLEUR</div><div class="card"><b id="streak">🔥 0</b>SÉRIE</div><div class="card"><b id="tries">0</b>ESSAIS</div></div>
-<div class="daily"><div>🎯 <b>DÉFI DU JOUR</b><br><span>Écart ≤ 0.050 s</span></div><span class="badge" id="dailyBadge">À FAIRE</span></div><div class="hint" id="progressText"></div>
-<div class="hint" id="hint"></div>
+<div class="cards">
+  <div class="card"><b id="runBest">—</b>MEILLEUR</div>
+  <div class="card"><b id="streak">🔥 0</b>SÉRIE</div>
+  <div class="card"><b id="tries">0</b>ESSAIS</div>
+</div>
+<div class="xpbar"><i id="xpfill"></i></div>
+<div class="metarow">
+ <div class="daily"><div>🎯 <b>DÉFI DU JOUR</b><br><span>Écart ≤ 0.050 s</span></div><span class="badge" id="dailyBadge">À FAIRE</span></div>
+ <div class="achievement"><b>🏅 TROPHÉES</b><br><span id="trophyMini">0 / 6</span></div>
+</div>
+<div class="progressText" id="progressText"></div>
 <div class="board"><div class="tabs"><b>🌍 CLASSEMENT N<span id="blvl">1</span></b><button class="tab on" id="world">MONDE</button><button class="tab" id="today">AUJOURD'HUI</button><button class="smallbtn" id="rename">PSEUDO</button></div><div class="rows" id="rows">Chargement…</div><div id="myrank" style="margin-top:4px;opacity:.55"></div></div>
 </main>
+
 <div class="overlay" id="gate"><div class="box"><h1>PERFECT STOP</h1><p id="gateText">Choisis ton pseudo. Il sera réservé pour toi.</p><input class="input" id="nameInput" maxlength="18" placeholder="Ton pseudo"><div class="msg" id="gateMsg"></div><button class="btn" id="nameBtn">JOUER</button></div></div>
+
+<div class="overlay" id="finish"><div class="box">
+<h1>🏆 RUN TERMINÉ</h1><p>Tu as terminé les 5 niveaux.</p>
+<div class="finishStats"><div><b id="fTries">0</b>ESSAIS</div><div><b id="fBest">—</b>MEILLEUR</div><div><b id="fStreak">0</b>SÉRIE MAX</div></div>
+<div class="trophyGrid" id="trophyGrid"></div>
+<button class="btn" id="again">NOUVEAU RUN</button>
+</div></div>
+<div class="confetti" id="confetti"></div>
+
 <script>
-const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF',HD={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'},
-N=['','ÉCHAUFFEMENT','DISPARITION','MÉMOIRE','CIBLE RANDOM','AVEUGLE TOTAL'],H=['','Chrono visible','Disparaît après 5 s','Visible seulement 2 s','Cible aléatoire + disparition','Aucun chrono'],HA=[99,99,5,2,2,0],BASE=[0,10,9,8,0,7];
+const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF',HD={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'};
+const N=['','ÉCHAUFFEMENT','DISPARITION','MÉMOIRE','CIBLE RANDOM','AVEUGLE TOTAL'];
+const H=['','Chrono visible','Disparaît après 5 s','Visible seulement 2 s','Cible aléatoire + disparition','Aucun chrono'];
+const HA=[99,99,5,2,2,0],BASE=[0,10,9,8,0,7];
+
 let level=+(localStorage.psLevel||1);if(level>5)level=1;
-let tries=0,pts=+(localStorage.psPoints||0),running=false,start=0,raf,target=BASE[level]||10,runBest=999,daily=false,lastElapsed=0,
-bests=JSON.parse(localStorage.psLevelBests||'[null,null,null,null,null,null]'),streak=+(localStorage.psStreak||0),bestStreak=+(localStorage.psBestStreak||0);
+let tries=0,totalRunTries=0,pts=+(localStorage.psPoints||0),xp=+(localStorage.psXP||0),running=false,start=0,raf,target=BASE[level]||10,runBest=999,daily=false,lastElapsed=0;
+let bests=JSON.parse(localStorage.psLevelBests||'[null,null,null,null,null,null]');
+let streak=+(localStorage.psStreak||0),bestStreak=+(localStorage.psBestStreak||0),runBestStreak=0;
+let totalWins=+(localStorage.psTotalWins||0),totalAttempts=+(localStorage.psTotalAttempts||0),perfects=+(localStorage.psPerfects||0);
+let trophies=JSON.parse(localStorage.psTrophies||'{}');
 let pid=localStorage.psPid||'',secret=localStorage.psSecret||'',pname='';
 const $=id=>document.getElementById(id);
-function uuid(){return crypto.randomUUID()}function token(){let a=new Uint8Array(32);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('')}
+
+function uuid(){return crypto.randomUUID()}
+function token(){let a=new Uint8Array(32);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('')}
 async function rpc(n,p){let r=await fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:HD,body:JSON.stringify(p)});return await r.json()}
 function esc(s){return String(s).replace(/[&<>"']/g,'')}
-function dayKey(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}function dailyDone(){return localStorage.psDailyDone===dayKey()}
-function drawDaily(){dailyBadge.textContent=dailyDone()?'TERMINÉ +100':'À FAIRE';dailyBadge.className='badge'+(dailyDone()?' ok':'')}
-async function ensurePlayer(){if(pid&&secret){let r=await rpc('perfect_stop_get_player',{p_player_id:pid,p_secret:secret});if(r&&r.ok){pname=r.username;gate.classList.remove('show');return}}gate.classList.add('show');gateText.textContent='Choisis ton pseudo. Il sera réservé pour toi.';nameBtn.textContent='JOUER';nameInput.value=''}
-async function claim(){let n=nameInput.value.trim();gateMsg.textContent='';if(n.length<2){gateMsg.textContent='Pseudo trop court.';return}if(!pid){pid=uuid();secret=token()}let r=await rpc('perfect_stop_claim_username',{p_player_id:pid,p_username:n,p_secret:secret});if(r.ok){pname=r.username;localStorage.psPid=pid;localStorage.psSecret=secret;localStorage.psName=pname;gate.classList.remove('show');board()}else if(r.error==='username_taken'){gateMsg.textContent='Ce pseudo est déjà pris.';pid='';secret=''}else gateMsg.textContent='Pseudo invalide.'}
-nameBtn.onclick=async()=>{if(nameBtn.textContent==='ENREGISTRER'){let n=nameInput.value.trim();let r=await rpc('perfect_stop_change_username',{p_player_id:pid,p_secret:secret,p_username:n});if(r.ok){pname=r.username;localStorage.psName=pname;gate.classList.remove('show');board()}else if(r.error==='username_taken')gateMsg.textContent='Ce pseudo est déjà pris.';else gateMsg.textContent='Impossible de changer le pseudo.'}else claim()};
-rename.onclick=()=>{gate.classList.add('show');gateText.textContent='Changer de pseudo';nameInput.value=pname;gateMsg.textContent='';nameBtn.textContent='ENREGISTRER'};
-async function board(){blvl.textContent=level;rows.textContent='Chargement…';let q='?select=player_name,error_ms,player_id,created_at&level=eq.'+level+'&error_ms=lte.200&order=error_ms.asc&limit=50';if(daily){let d=new Date();d.setHours(0,0,0,0);q+='&created_at=gte.'+encodeURIComponent(d.toISOString())}try{let r=await fetch(U+'/rest/v1/perfect_stop_scores'+q,{headers:HD}),a=await r.json(),seen=new Set(),u=[];for(let x of a){let key=x.player_id||('legacy:'+x.player_name.toLowerCase());if(seen.has(key))continue;seen.add(key);u.push(x)}let top=u.slice(0,5),med=['🥇','🥈','🥉','4.','5.'];rows.innerHTML=top.length?top.map((x,i)=>'<span>'+med[i]+' '+esc(x.player_name)+'</span><b>'+(x.error_ms/1000).toFixed(3)+'s</b>').join(''):'Aucun score — sois le premier !';let ix=u.findIndex(x=>x.player_id===pid);myrank.textContent=ix>=0?'Ton rang : #'+(ix+1)+' • '+(u[ix].error_ms/1000).toFixed(3)+'s':''}catch(e){rows.textContent='Classement indisponible'}}
-world.onclick=()=>{daily=false;world.classList.add('on');today.classList.remove('on');board()};today.onclick=()=>{daily=true;today.classList.add('on');world.classList.remove('on');board()};
+function dayKey(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function dailyDone(){return localStorage.psDailyDone===dayKey()}
+function haptic(ms=25){try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}}
+function rankInfo(){if(xp>=2500)return['DIAMANT',2500,4000];if(xp>=1200)return['OR',1200,2500];if(xp>=500)return['ARGENT',500,1200];return['BRONZE',0,500]}
+function trophyDefs(){return[
+ ['first','🎯 Première réussite',totalWins>=1],
+ ['hot','🔥 Série x5',bestStreak>=5],
+ ['sharp','⚡ Sous 0.050 s',bests.slice(1).some(x=>x!=null&&x<=.05)],
+ ['perfect','🏆 0.000 s',perfects>=1],
+ ['daily','📅 Défi quotidien',dailyDone()],
+ ['master','👑 Maître des 5 niveaux',!!trophies.master]
+]}
+function updateTrophies(){for(const [k,n,ok] of trophyDefs())if(ok)trophies[k]=true;localStorage.psTrophies=JSON.stringify(trophies);let n=trophyDefs().filter(x=>trophies[x[0]]).length;$('trophyMini').textContent=n+' / 6'}
+function drawDaily(){$('dailyBadge').textContent=dailyDone()?'TERMINÉ +100':'À FAIRE';$('dailyBadge').className='badge'+(dailyDone()?' ok':'')}
+function confetti(){let c=$('confetti');c.innerHTML='';for(let i=0;i<35;i++){let e=document.createElement('i');e.style.left=Math.random()*100+'%';e.style.animationDelay=Math.random()*.4+'s';e.style.transform='rotate('+Math.random()*180+'deg)';e.style.opacity=.6+Math.random()*.4;c.appendChild(e)}setTimeout(()=>c.innerHTML='',2300)}
+async function ensurePlayer(){if(pid&&secret){let r=await rpc('perfect_stop_get_player',{p_player_id:pid,p_secret:secret});if(r&&r.ok){pname=r.username;$('gate').classList.remove('show');return}}$('gate').classList.add('show');$('gateText').textContent='Choisis ton pseudo. Il sera réservé pour toi.';$('nameBtn').textContent='JOUER';$('nameInput').value=''}
+async function claim(){let n=$('nameInput').value.trim();$('gateMsg').textContent='';if(n.length<2){$('gateMsg').textContent='Pseudo trop court.';return}if(!pid){pid=uuid();secret=token()}let r=await rpc('perfect_stop_claim_username',{p_player_id:pid,p_username:n,p_secret:secret});if(r.ok){pname=r.username;localStorage.psPid=pid;localStorage.psSecret=secret;localStorage.psName=pname;$('gate').classList.remove('show');board()}else if(r.error==='username_taken'){$('gateMsg').textContent='Ce pseudo est déjà pris.';pid='';secret=''}else $('gateMsg').textContent='Pseudo invalide.'}
+$('nameBtn').onclick=async()=>{if($('nameBtn').textContent==='ENREGISTRER'){let n=$('nameInput').value.trim();let r=await rpc('perfect_stop_change_username',{p_player_id:pid,p_secret:secret,p_username:n});if(r.ok){pname=r.username;localStorage.psName=pname;$('gate').classList.remove('show');board()}else if(r.error==='username_taken')$('gateMsg').textContent='Ce pseudo est déjà pris.';else $('gateMsg').textContent='Impossible de changer le pseudo.'}else claim()};
+$('rename').onclick=()=>{$('gate').classList.add('show');$('gateText').textContent='Changer de pseudo';$('nameInput').value=pname;$('gateMsg').textContent='';$('nameBtn').textContent='ENREGISTRER'};
+
+async function board(){$('blvl').textContent=level;$('rows').textContent='Chargement…';let q='?select=player_name,error_ms,player_id,created_at&level=eq.'+level+'&error_ms=lte.200&order=error_ms.asc&limit=50';if(daily){let d=new Date();d.setHours(0,0,0,0);q+='&created_at=gte.'+encodeURIComponent(d.toISOString())}try{let r=await fetch(U+'/rest/v1/perfect_stop_scores'+q,{headers:HD}),a=await r.json(),seen=new Set(),u=[];for(let x of a){let key=x.player_id||('legacy:'+x.player_name.toLowerCase());if(seen.has(key))continue;seen.add(key);u.push(x)}let top=u.slice(0,5),med=['🥇','🥈','🥉','4.','5.'];$('rows').innerHTML=top.length?top.map((x,i)=>'<span>'+med[i]+' '+esc(x.player_name)+'</span><b>'+(x.error_ms/1000).toFixed(3)+'s</b>').join(''):'Aucun score — sois le premier !';let ix=u.findIndex(x=>x.player_id===pid);$('myrank').textContent=ix>=0?'Ton rang : #'+(ix+1)+' • '+(u[ix].error_ms/1000).toFixed(3)+'s':''}catch(e){$('rows').textContent='Classement indisponible'}}
+$('world').onclick=()=>{daily=false;$('world').classList.add('on');$('today').classList.remove('on');board()};
+$('today').onclick=()=>{daily=true;$('today').classList.add('on');$('world').classList.remove('on');board()};
 async function send(d,l){if(!pid||!secret||d>.20)return;await rpc('perfect_stop_submit_score',{p_player_id:pid,p_secret:secret,p_level:l,p_error_ms:Math.round(d*1000)});if(l===level)board()}
-function save(){localStorage.psLevel=level;localStorage.psPoints=pts;localStorage.psLevelBests=JSON.stringify(bests);localStorage.psStreak=streak;localStorage.psBestStreak=bestStreak}
-function draw(){track.innerHTML='';for(let i=1;i<=5;i++){let d=document.createElement('div');d.className='dot '+(i<level?'done':'');track.appendChild(d)}lvl.textContent='NIVEAU '+level+' • '+N[level];hint.textContent=H[level]+' • Meilleure série : '+bestStreak;points.textContent=pts;document.getElementById('tries').textContent=tries;streakEl=document.getElementById('streak');streakEl.textContent='🔥 '+streak;runBest.textContent=runBest<999?runBest.toFixed(3)+'s':'—';if(level!==4)goal.textContent=BASE[level].toFixed(2);drawDaily();document.getElementById('progressText').textContent=level<5?'Prochain niveau : réussis ce niveau':'Dernier niveau • vise le record';board()}
-function loop(now){if(!running)return;lastElapsed=(now-start)/1000;if(level<5)timer.textContent=lastElapsed.toFixed(3);if(lastElapsed>=HA[level])timer.classList.add('hide');if(lastElapsed>=target+3){finish(lastElapsed)}else raf=requestAnimationFrame(loop)}
-function finish(elapsed){if(!running)return;running=false;cancelAnimationFrame(raf);const played=level;const x=Number(elapsed);const d=Math.abs(target-x);const late=x>target;timer.classList.remove('hide');timer.textContent=x.toFixed(3);tries++;const old=bests[level];const isRecord=old==null||d<old;runBest=Math.min(runBest,d);if(isRecord)bests[level]=d;const pass=d<=.20;let base=0;if(d<.0005)base=100;else if(d<=.03)base=50;else if(d<=.10)base=25;else if(pass)base=10;
-if(pass){streak++;bestStreak=Math.max(bestStreak,streak);let mult=Math.min(4,1+Math.floor((streak-1)/3));let add=base*mult;pts+=add;let extra=mult>1?' <span class="streak">x'+mult+' SÉRIE</span>':'';if(d<.0005)result.innerHTML='<span class="perfect">🏆 PERFECT 0.000s • +'+add+'</span>'+extra;else if(d<=.03)result.innerHTML='<span class="perfect">🏆 '+d.toFixed(3)+'s • +'+add+'</span>'+extra;else if(d<=.10)result.innerHTML='🔥 '+d.toFixed(3)+'s • +'+add+extra+'<span class="direction">'+(late?'Trop tard':'Trop tôt')+'</span>';else result.innerHTML='✅ RÉUSSI • '+d.toFixed(3)+'s • +'+add+extra+'<span class="direction">'+(late?'Trop tard':'Trop tôt')+'</span>';if(isRecord)result.innerHTML+='<span class="record">✨ NOUVEAU RECORD PERSONNEL</span>';if(d<=.05&&!dailyDone()){pts+=100;localStorage.psDailyDone=dayKey();result.innerHTML+='<span class="record">🎯 DÉFI DU JOUR TERMINÉ • +100</span>'}send(d,played);if(level<5){level++;setTimeout(()=>{target=BASE[level]||10;goal.textContent=(level===4?'?':target.toFixed(2));draw()},550)}else result.innerHTML+=' 👑'}else{streak=0;result.innerHTML='❌ '+d.toFixed(3)+'s • objectif ≤ 0.20s<span class="direction">Temps : '+x.toFixed(3)+' s • '+(late?'⏰ Trop tard — appuie plus tôt':'⚡ Trop tôt — attends davantage')+'</span>'}save();btn.textContent='REJOUER';draw()}
-btn.onclick=()=>{if(running){const elapsed=(performance.now()-start)/1000;finish(elapsed);return}target=level===4?(Math.floor(Math.random()*301)+700)/100:BASE[level];goal.textContent=target.toFixed(2);running=true;start=performance.now();lastElapsed=0;timer.textContent=level===5?'••••':'0.000';timer.classList.toggle('hide',level===5);result.textContent='STOP au bon moment !';btn.textContent='STOP';raf=requestAnimationFrame(loop)};
+
+function save(){localStorage.psLevel=level;localStorage.psPoints=pts;localStorage.psXP=xp;localStorage.psLevelBests=JSON.stringify(bests);localStorage.psStreak=streak;localStorage.psBestStreak=bestStreak;localStorage.psTotalWins=totalWins;localStorage.psTotalAttempts=totalAttempts;localStorage.psPerfects=perfects;updateTrophies()}
+function draw(){let t=$('track');t.innerHTML='';for(let i=1;i<=5;i++){let d=document.createElement('div');d.className='dot '+(i<level?'done ':'')+(i===level?'current':'');t.appendChild(d)}$('lvl').textContent='NIVEAU '+level+' • '+N[level];$('points').textContent=pts;$('tries').textContent=tries;$('streak').textContent='🔥 '+streak;$('runBest').textContent=runBest<999?runBest.toFixed(3)+'s':'—';if(level!==4)$('goal').textContent=BASE[level].toFixed(2);let r=rankInfo();$('rankChip').textContent=r[0]+' • '+xp+' XP';$('xpfill').style.width=Math.min(100,((xp-r[1])/(r[2]-r[1]))*100)+'%';$('progressText').textContent=level<5?'Prochaine étape : réussir ce niveau • '+H[level]:'Dernier niveau • vise le meilleur chrono';drawDaily();updateTrophies();board()}
+
+function loop(now){if(!running)return;lastElapsed=(now-start)/1000;if(level<5)$('timer').textContent=lastElapsed.toFixed(3);if(lastElapsed>=HA[level])$('timer').classList.add('hide');if(lastElapsed>=target+3)finishAttempt(lastElapsed);else raf=requestAnimationFrame(loop)}
+
+function finishAttempt(elapsed){
+ if(!running)return;running=false;cancelAnimationFrame(raf);
+ const played=level,x=Number(elapsed),d=Math.abs(target-x),late=x>target;
+ $('timer').classList.remove('hide');$('timer').textContent=x.toFixed(3);
+ tries++;totalRunTries++;totalAttempts++;
+ const old=bests[level],isRecord=old==null||d<old;
+ runBest=Math.min(runBest,d);if(isRecord)bests[level]=d;
+ const pass=d<=.20;let base=0;
+ if(d<.0005){base=100;perfects++}else if(d<=.03)base=50;else if(d<=.10)base=25;else if(pass)base=10;
+
+ if(pass){
+   haptic(45);$('app').classList.add('flash');setTimeout(()=>$('app').classList.remove('flash'),450);
+   streak++;bestStreak=Math.max(bestStreak,streak);runBestStreak=Math.max(runBestStreak,streak);totalWins++;
+   let mult=Math.min(4,1+Math.floor((streak-1)/3)),add=base*mult;pts+=add;xp+=10+(d<=.05?15:0);
+   let extra=mult>1?' <span class="streak">x'+mult+' SÉRIE</span>':'';
+   if(d<.0005)$('result').innerHTML='<span class="perfect">🏆 PERFECT 0.000s • +'+add+'</span>'+extra;
+   else if(d<=.03)$('result').innerHTML='<span class="perfect">🏆 '+d.toFixed(3)+'s • +'+add+'</span>'+extra;
+   else if(d<=.10)$('result').innerHTML='🔥 '+d.toFixed(3)+'s • +'+add+extra+'<span class="direction">'+(late?'Trop tard':'Trop tôt')+'</span>';
+   else $('result').innerHTML='✅ RÉUSSI • '+d.toFixed(3)+'s • +'+add+extra+'<span class="direction">'+(late?'Trop tard':'Trop tôt')+'</span>';
+   if(isRecord)$('result').innerHTML+='<span class="record">✨ NOUVEAU RECORD PERSONNEL</span>';
+   if(d<=.05&&!dailyDone()){pts+=100;xp+=75;localStorage.psDailyDone=dayKey();$('result').innerHTML+='<span class="record">🎯 DÉFI DU JOUR TERMINÉ • +100</span>'}
+   send(d,played);
+   if(level<5){
+      level++;setTimeout(()=>{target=BASE[level]||10;$('goal').textContent=(level===4?'?':target.toFixed(2));draw()},650)
+   }else{
+      trophies.master=true;localStorage.psTrophies=JSON.stringify(trophies);confetti();setTimeout(showFinish,650)
+   }
+ }else{
+   haptic([35,40,35]);$('app').classList.add('shake');setTimeout(()=>$('app').classList.remove('shake'),320);
+   streak=0;$('result').innerHTML='❌ '+d.toFixed(3)+'s • objectif ≤ 0.20s<span class="direction">Temps : '+x.toFixed(3)+' s • '+(late?'⏰ Trop tard — appuie plus tôt':'⚡ Trop tôt — attends davantage')+'</span>'
+ }
+ save();$('btn').textContent='REJOUER';draw()
+}
+
+function showFinish(){
+ $('fTries').textContent=totalRunTries;$('fBest').textContent=runBest<999?runBest.toFixed(3)+'s':'—';$('fStreak').textContent=runBestStreak;
+ $('trophyGrid').innerHTML=trophyDefs().map(([k,n,ok])=>'<div class="trophy '+(trophies[k]?'on':'')+'">'+n+'</div>').join('');
+ $('finish').classList.add('show')
+}
+$('again').onclick=()=>{level=1;tries=0;totalRunTries=0;runBest=999;runBestStreak=0;streak=0;localStorage.psLevel=1;localStorage.psStreak=0;$('finish').classList.remove('show');$('goal').textContent='10.00';$('timer').textContent='0.000';$('result').textContent='Nouveau run !';draw()};
+
+$('btn').onclick=()=>{
+ if(running){finishAttempt((performance.now()-start)/1000);return}
+ target=level===4?(Math.floor(Math.random()*301)+700)/100:BASE[level];
+ $('goal').textContent=target.toFixed(2);running=true;start=performance.now();lastElapsed=0;
+ $('timer').textContent=level===5?'••••':'0.000';$('timer').classList.toggle('hide',level===5);
+ $('result').textContent='STOP au bon moment !';$('btn').textContent='STOP';raf=requestAnimationFrame(loop)
+};
+
 draw();ensurePlayer();
 </script></body></html>
