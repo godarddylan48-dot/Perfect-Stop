@@ -2124,6 +2124,25 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
 })();
 </script>
 
+
+<style id="v253-safe-replay">
+body.v253-running #v252ReplayBtn{display:none!important}
+</style>
+<script id="v253-safe-replay-script">
+(()=>{
+  function syncReplayButton(){
+    document.body.classList.toggle('v253-running', !!window.running);
+  }
+  document.addEventListener('pointerdown', ()=>{
+    setTimeout(syncReplayButton, 0);
+    setTimeout(syncReplayButton, 80);
+  }, true);
+  const watch=setInterval(syncReplayButton,100);
+  window.addEventListener('beforeunload',()=>clearInterval(watch));
+  syncReplayButton();
+})();
+</script>
+
 </body></html>
 <style id="v238-continuous-style">
 #v19BossHud{display:none!important}
