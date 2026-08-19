@@ -920,4 +920,21 @@ body.v22-game main.w{padding-bottom:84px}
 })();
 </script>
 
+
+<style id="v231-home-presence-hide">
+#v21Active,#v21ActiveText{display:none!important}
+</style>
+<script id="v231-fix">
+(()=>{
+ const el=document.getElementById('v21Active');
+ if(el){
+   const wrap=el.parentElement;
+   if(wrap && wrap.children.length===1) wrap.remove();
+   else el.remove();
+ }
+ const ver=document.querySelector('.v181ver');
+ if(ver) ver.textContent='VERSION 23.1 • COMPÉTITION MULTIJOUEUR';
+})();
+</script>
+
 </body></html>
