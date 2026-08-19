@@ -125,8 +125,10 @@ function levelTolerance(){
 }
 function hideAfter(){
  const tier=difficultyTier(),m=mode();
- // Timer progressively disappears earlier. Blind/boss stay fully hidden.
- if(m>=4)return 0;
+ // Niveau 4 : visible environ 2 s, puis disparaît.
+ // Niveau 5 : visible environ 1 s, puis disparaît.
+ if(m===5)return Math.max(.5,1-tier*.05);
+ if(m===4)return Math.max(.8,2-tier*.10);
  return Math.max(.22,(HA[m]||1)-tier*.16)
 }
 function targetForLevel(){
@@ -243,8 +245,8 @@ function draw(){
 
 function loop(now){
  if(!running)return;lastElapsed=(now-start)/1000;let m=mode(),h=hideAfter();
- if(m<4)$('timer').textContent=lastElapsed.toFixed(3);
- if(m>=4 || lastElapsed>=h)$('timer').classList.add('hide');
+ $('timer').textContent=lastElapsed.toFixed(3);
+ if(lastElapsed>=h)$('timer').classList.add('hide');
  if(lastElapsed>=target+3)finishAttempt(lastElapsed);else raf=requestAnimationFrame(loop)
 }
 
@@ -300,7 +302,7 @@ $('btn').onclick=()=>{
  let m=mode();
  target=targetForLevel();
  $('goal').textContent=target.toFixed(2);running=true;start=performance.now();lastElapsed=0;
- $('timer').textContent=m>=4?'••••':'0.000';$('timer').classList.toggle('hide',m>=4);
+ $('timer').textContent='0.000';$('timer').classList.remove('hide');
  $('result').textContent='STOP au bon moment !';$('btn').textContent='STOP';raf=requestAnimationFrame(loop)
 };
 
@@ -2052,12 +2054,12 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')startPresence()});
  startPresence();
 
- const ver=q('.v181ver');if(ver)ver.textContent='VERSION 25.0 • PRÉSENCE FIABLE';
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 25.1 • NIVEAU 5 CORRIGÉ';
 })();
 </script>
 
 <script id="v249-version-fix">
-(()=>{setTimeout(()=>{const v=document.querySelector('.v181ver');if(v)v.textContent='VERSION 25.0 • PRÉSENCE FIABLE'},300);})();
+(()=>{setTimeout(()=>{const v=document.querySelector('.v181ver');if(v)v.textContent='VERSION 25.1 • NIVEAU 5 CORRIGÉ'},300);})();
 </script>
 </body></html>
 <style id="v238-continuous-style">
