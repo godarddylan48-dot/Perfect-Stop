@@ -2115,35 +2115,30 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  },true);
 
  // Also add replay selector directly on play screen near main button.
+ const mainBtn=$('btn');
+ if(mainBtn && !q('v252ReplayBtn')){
+   const r=document.createElement('button');r.id='v252ReplayBtn';r.textContent='🗺️ REJOUER UN NIVEAU DÉBLOQUÉ';
+   r.onclick=openReplay;mainBtn.insertAdjacentElement('afterend',r);
+ }
  window.openReplayLevels=openReplay;
 })();
 </script>
 
 
-<style id="v253-safe-replay">
-body.v253-running #v252ReplayBtn{display:none!important}
+<style id="v255-level-button-safe">
+body.v255-playing #v252ReplayBtn{display:none!important}
 </style>
-<script id="v253-safe-replay-script">
+<script id="v255-level-button-safe-script">
 (()=>{
-  function syncReplayButton(){
-    document.body.classList.toggle('v253-running', !!window.running);
-  }
-  document.addEventListener('pointerdown', ()=>{
-    setTimeout(syncReplayButton, 0);
-    setTimeout(syncReplayButton, 80);
-  }, true);
-  const watch=setInterval(syncReplayButton,100);
-  window.addEventListener('beforeunload',()=>clearInterval(watch));
-  syncReplayButton();
-})();
-</script>
-
-
-<script id="v254-menu-only">
-(()=>{
- const clean=()=>{const b=document.getElementById('v252ReplayBtn'); if(b)b.remove();};
- clean();
- new MutationObserver(clean).observe(document.body,{childList:true,subtree:true});
+ function syncLevelButton(){
+   const b=document.getElementById('v252ReplayBtn');
+   if(!b)return;
+   const playing = (typeof running!=='undefined' && running===true);
+   document.body.classList.toggle('v255-playing', playing);
+   b.textContent='🗺️ CHOISIR UN NIVEAU';
+ }
+ setInterval(syncLevelButton,50);
+ syncLevelButton();
 })();
 </script>
 
