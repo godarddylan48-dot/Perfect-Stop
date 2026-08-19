@@ -404,7 +404,7 @@ draw();ensurePlayer();
 #v19Daily b{color:#ffd45b}.v19-claim{border:0;border-radius:10px;padding:9px 12px;background:#2d7446;color:white;font-weight:900}
 #v19Modifier{position:fixed;z-index:9500;left:50%;top:26%;transform:translate(-50%,-50%);background:#0b1027ee;border:1px solid #ffffff20;border-radius:16px;padding:12px 18px;color:white;font:900 14px system-ui;opacity:0;pointer-events:none}.v19-show{animation:v19show 1.2s ease}@keyframes v19show{0%{opacity:0;transform:translate(-50%,-60%)}20%,75%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0}}
 .v19-fog #timer{filter:blur(8px)!important;opacity:.28!important}.v19-flash #timer{animation:v19blink .45s steps(1) infinite}@keyframes v19blink{50%{opacity:.05}}
-.v19-tiny #timer{transform:scale(.72)}.v19-dark #timer{opacity:0!important}.v19-pulse #timer{animation:v19pulse .7s ease-in-out infinite}@keyframes v19pulse{50%{transform:scale(1.08)}}
+.v19-tiny #timer{transform:scale(.72)}.v19-dark #timer:not(.hide){opacity:1!important}.v19-dark #timer.hide{opacity:0!important}.v19-pulse #timer{animation:v19pulse .7s ease-in-out infinite}@keyframes v19pulse{50%{transform:scale(1.08)}}
 .v19-bosshud{position:fixed;top:165px;left:50%;transform:translateX(-50%);z-index:200;background:#350e0ee8;border:1px solid #ff8f3d55;border-radius:999px;padding:6px 12px;color:#fff;font:900 11px system-ui;display:none}.v19-bosshud.on{display:block}
 </style>
 
