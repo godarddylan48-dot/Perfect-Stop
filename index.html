@@ -64,7 +64,16 @@ body{background:radial-gradient(circle at 50% 7%,#263763,#080a13 62%);color:#fff
 #suddenMsg{min-height:55px;margin:20px 0 0;font-size:18px;font-weight:800}
 #suddenNext{display:none}
 
-</style></head><body>
+</style>
+<style id="v256-ranking-levels">
+.v256ranktop{display:grid;grid-template-columns:54px 1fr 54px;gap:9px;margin:2px 0 14px}
+.v256ranktop button,.v256ranktop select{border:1px solid rgba(255,255,255,.12);background:#111a38;color:#fff;border-radius:14px;min-height:48px;font-weight:900;font-size:16px}
+.v256ranktop button{font-size:29px}.v256ranktop select{text-align:center;padding:0 10px}
+.v22leader.v256me{outline:1px solid #d49b27;background:rgba(212,155,39,.10)}
+.v256myrank{margin-top:12px;padding:13px;border-radius:13px;background:#121a36;color:#d6a73e;font-weight:900;text-align:center}
+</style>
+
+</head><body>
 <main class="w" id="app">
 <div class="top"><b>PERFECT STOP</b><span class="rankchip" id="rankChip">BRONZE • 0 XP</span><span><button class="iconbtn" id="soundBtn">🔊</button> <button class="iconbtn" id="statsBtn">📊</button> 🏆 <b id="points">0</b></span></div>
 <div class="lvl" id="lvl"></div><div class="track" id="track"></div>
@@ -764,19 +773,46 @@ body.v22-game main.w{padding-bottom:84px}
    hidePanel();home?.classList.add('hide');document.body.classList.add('v22-game');setNav('play')
  }
  async function openRank(){
-   setNav('rank');
-   let rows='<div class="v22card"><b>Chargement du classement…</b></div>';
-   showPanel('🌍 Classement',rows);
-   try{
-     const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
-     const r=await fetch(U+'/rest/v1/perfect_stop_scores?select=player_name,error_ms,level&error_ms=lte.200&order=error_ms.asc&limit=50',{headers:{apikey:K,Authorization:'Bearer '+K}});
-     const a=await r.json(),seen=new Set(),u=[];
-     for(const x of a){let key=(x.player_name||'').toLowerCase();if(seen.has(key))continue;seen.add(key);u.push(x)}
-     content.innerHTML=`<div class="v22card"><b>🏆 Top mondial</b><small>Meilleur écart enregistré, tous niveaux confondus.</small></div>`+
-     (u.slice(0,10).map((x,i)=>`<div class="v22leader"><span>${i<3?['🥇','🥈','🥉'][i]:i+1+'.'} ${x.player_name}</span><b>${(x.error_ms/1000).toFixed(3)}s</b></div>`).join('')||'<div class=v22card>Aucun score.</div>')
-   }catch(e){content.innerHTML='<div class=v22card>Classement indisponible.</div>'}
- }
- function openProfile(){
+    setNav('rank');
+    const max=Math.max(1,+(localStorage.psWorldLevel||localStorage.psLevel||1));
+    showPanel('🌍 Classement',`
+      <div class="v256ranktop">
+        <button id="v256Prev">‹</button>
+        <select id="v256Level"></select>
+        <button id="v256Next">›</button>
+      </div>
+      <div id="v256RankBody"><div class="v22card"><b>Chargement du classement…</b></div></div>
+    `);
+    const sel=document.getElementById('v256Level'),body=document.getElementById('v256RankBody');
+    for(let n=1;n<=max;n++){
+      const o=document.createElement('option');o.value=n;
+      o.textContent=(n%5===0?'👑 Boss ':'Niveau ')+n;
+      sel.appendChild(o);
+    }
+    sel.value=Math.min(level,max);
+    async function loadRank(){
+      const n=+sel.value;
+      body.innerHTML='<div class="v22card"><b>Chargement…</b></div>';
+      try{
+        const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
+        const r=await fetch(U+'/rest/v1/perfect_stop_scores?select=player_name,error_ms,player_id,level&level=eq.'+n+'&error_ms=lte.200&order=error_ms.asc&limit=100',{headers:{apikey:K,Authorization:'Bearer '+K}});
+        const a=await r.json(),seen=new Set(),u=[];
+        for(const x of a){
+          const key=x.player_id||('legacy:'+(x.player_name||'').toLowerCase());
+          if(seen.has(key))continue;seen.add(key);u.push(x);
+        }
+        const me=(localStorage.psName||'').toLowerCase(),ix=u.findIndex(x=>(x.player_name||'').toLowerCase()===me);
+        body.innerHTML=`<div class="v22card"><b>${n%5===0?'👑 BOSS '+n:'🎯 NIVEAU '+n}</b><small>Meilleur score enregistré sur ce niveau.</small></div>`+
+          (u.slice(0,20).map((x,i)=>`<div class="v22leader ${((x.player_name||'').toLowerCase()===me)?'v256me':''}"><span>${i<3?['🥇','🥈','🥉'][i]:i+1+'.'} ${esc(x.player_name)}</span><b>${(x.error_ms/1000).toFixed(3)}s</b></div>`).join('')||'<div class="v22card">Aucun score — prends la 1re place !</div>')+
+          (ix>=20?`<div class="v256myrank">Ton rang : #${ix+1} • ${(u[ix].error_ms/1000).toFixed(3)}s</div>`:'');
+      }catch(e){body.innerHTML='<div class="v22card">Classement indisponible.</div>'}
+    }
+    sel.onchange=loadRank;
+    document.getElementById('v256Prev').onclick=()=>{if(+sel.value>1){sel.value=+sel.value-1;loadRank()}};
+    document.getElementById('v256Next').onclick=()=>{if(+sel.value<max){sel.value=+sel.value+1;loadRank()}};
+    loadRank();
+  }
+  function openProfile(){
    setNav('profile');
    const a=num('psTotalAttempts'),w=num('psTotalWins'),xp=num('psXP'),st=num('psBestStreak'),coins=num('psV181Coins');
    const name=LS.psName||'Joueur';
