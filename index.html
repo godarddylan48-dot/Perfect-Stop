@@ -258,4 +258,47 @@ animation:v14fall 1.25s linear forwards}
 })();
 </script>
 
+
+<style id="v15-style">
+#v15Home{position:fixed;inset:0;z-index:9000;background:radial-gradient(circle at 50% 0,#101d58 0,#03081e 45%,#01030d 100%);color:white;font-family:system-ui;display:flex;align-items:center;justify-content:center;padding:22px}
+#v15Home.hide{display:none}.v15card{width:min(100%,430px);text-align:center}.v15logo{font-size:38px;font-weight:1000;letter-spacing:4px}.v15sub{opacity:.6;margin:8px 0 25px}.v15rank{display:flex;justify-content:space-between;background:#ffffff09;border:1px solid #ffffff12;border-radius:18px;padding:15px;margin-bottom:13px}.v15xp{font-weight:900;color:#d69a21}
+.v15play,.v15btn{border:0;color:#fff;font-weight:900;border-radius:18px}.v15play{width:100%;font-size:25px;padding:21px;background:linear-gradient(135deg,#d18a00,#ffb52a);box-shadow:0 12px 35px #e69b0038}.v15grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.v15btn{padding:15px;background:#10162d;border:1px solid #ffffff12;font-size:14px}
+#v15Sheet{position:fixed;inset:0;z-index:9100;background:#000b;display:none;align-items:flex-end;font-family:system-ui;color:#fff}#v15Sheet.on{display:flex}.v15sheetin{width:100%;background:#070b1c;border-radius:28px 28px 0 0;padding:22px;max-height:75vh;overflow:auto}.v15sheetin h2{margin:0 0 15px}.v15mission{background:#ffffff08;border:1px solid #ffffff10;border-radius:15px;padding:14px;margin:9px 0;display:flex;justify-content:space-between}.v15close{width:100%;margin-top:12px;padding:15px;border:0;border-radius:15px;font-weight:900}
+#v15Hud{position:fixed;left:10px;right:10px;top:8px;z-index:100;pointer-events:none;display:none;justify-content:space-between;font:800 12px system-ui;color:#fff9}#v15Hud.on{display:flex}
+</style>
+<div id="v15Home">
+ <div class="v15card">
+  <div class="v15logo">PERFECT<br>STOP</div><div class="v15sub">Précision • Réflexes • Classement</div>
+  <div class="v15rank"><span>🏅 <b id="v15League">BRONZE</b></span><span class="v15xp" id="v15Coins">🪙 0</span></div>
+  <button class="v15play" id="v15Play">▶ JOUER</button>
+  <div class="v15grid"><button class="v15btn" data-v15="missions">🎯 MISSIONS</button><button class="v15btn" data-v15="stats">📊 PROFIL</button><button class="v15btn" data-v15="levels">🗺️ NIVEAUX</button><button class="v15btn" data-v15="rewards">🏆 RÉCOMPENSES</button></div>
+ </div>
+</div>
+<div id="v15Sheet"><div class="v15sheetin"><h2 id="v15Title"></h2><div id="v15Content"></div><button class="v15close">FERMER</button></div></div>
+<div id="v15Hud"><span>🔥 <b id="v15Combo">0</b></span><span id="v15HudCoins">🪙 0</span></div>
+<script id="v15-features">
+(()=>{
+ let s={combo:0,maxCombo:0,coins:0,dailyPlays:0,missions:{play10:0,streak3:0}};
+ try{s={...s,...JSON.parse(localStorage.getItem('perfectStopV14')||'{}')}}catch(e){}
+ const $=x=>document.querySelector(x), home=$('#v15Home'),sheet=$('#v15Sheet');
+ const refresh=()=>{$('#v15Coins').textContent='🪙 '+(s.coins||0);$('#v15HudCoins').textContent='🪙 '+(s.coins||0);$('#v15Combo').textContent=s.combo||0};
+ refresh();
+ $('#v15Play').onclick=()=>{home.classList.add('hide');$('#v15Hud').classList.add('on')};
+ const open=(type)=>{
+   let title='',c='';
+   if(type==='missions'){title='🎯 Missions';c=`<div class=v15mission><span>Jouer 10 parties</span><b>${Math.min(10,s.missions?.play10||0)}/10</b></div><div class=v15mission><span>Faire une série x3</span><b>${s.missions?.streak3?'✅':'0/1'}</b></div><div class=v15mission><span>Défi du jour</span><b>${(s.dailyPlays||0)>=5?'✅':'À faire'}</b></div>`}
+   if(type==='stats'){title='📊 Profil';c=`<div class=v15mission><span>Meilleure série</span><b>x${s.maxCombo||0}</b></div><div class=v15mission><span>Pièces gagnées</span><b>${s.coins||0}</b></div><div class=v15mission><span>Parties aujourd’hui</span><b>${s.dailyPlays||0}</b></div>`}
+   if(type==='levels'){title='🗺️ Les 5 niveaux';c='<div class=v15mission><span>1 • Classique</span><b>🎯</b></div><div class=v15mission><span>2 • Disparition</span><b>👻</b></div><div class=v15mission><span>3 • Mémoire</span><b>🧠</b></div><div class=v15mission><span>4 • Turbo</span><b>⚡</b></div><div class=v15mission><span>5 • Chaos</span><b>👑</b></div>'}
+   if(type==='rewards'){title='🏆 Récompenses';c='<div class=v15mission><span>🥉 Bronze</span><b>Départ</b></div><div class=v15mission><span>🥈 Argent</span><b>500 XP</b></div><div class=v15mission><span>🥇 Or</span><b>1500 XP</b></div><div class=v15mission><span>💎 Diamant</span><b>5000 XP</b></div>'}
+   $('#v15Title').textContent=title;$('#v15Content').innerHTML=c;sheet.classList.add('on');
+ };
+ document.querySelectorAll('[data-v15]').forEach(b=>b.onclick=()=>open(b.dataset.v15));
+ $('.v15close').onclick=()=>sheet.classList.remove('on');sheet.onclick=e=>{if(e.target===sheet)sheet.classList.remove('on')};
+ // Keep new HUD synced with V14's persisted competitive stats.
+ setInterval(()=>{try{s={...s,...JSON.parse(localStorage.getItem('perfectStopV14')||'{}')};refresh()}catch(e){}},600);
+ // Return to menu by tapping the V15 HUD coin counter.
+ $('#v15HudCoins').style.pointerEvents='auto';$('#v15HudCoins').onclick=()=>{home.classList.remove('hide');$('#v15Hud').classList.remove('on')};
+})();
+</script>
+
 </body></html>
