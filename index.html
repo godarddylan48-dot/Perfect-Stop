@@ -127,7 +127,7 @@ function hideAfter(){
  const tier=difficultyTier(),m=mode();
  // Niveau 4 : visible environ 2 s, puis disparaît.
  // Niveau 5 : visible environ 1 s, puis disparaît.
- if(m===5)return Math.max(.5,1-tier*.05);
+ if(m===5)return 2.30;
  if(m===4)return Math.max(.8,2-tier*.10);
  return Math.max(.22,(HA[m]||1)-tier*.16)
 }
