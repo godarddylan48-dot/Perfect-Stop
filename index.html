@@ -73,6 +73,17 @@ body{background:radial-gradient(circle at 50% 7%,#263763,#080a13 62%);color:#fff
 .v256myrank{margin-top:12px;padding:13px;border-radius:13px;background:#121a36;color:#d6a73e;font-weight:900;text-align:center}
 </style>
 
+
+<script id="v257-coins-sync">
+(()=>{
+ const LS=localStorage;
+ const canonical=Number(LS.getItem('psV181Coins')??LS.getItem('psCoins')??LS.getItem('ps_coins')??0)||0;
+ LS.setItem('psV181Coins',canonical);
+ LS.setItem('psCoins',canonical);
+ LS.setItem('ps_coins',canonical);
+})();
+</script>
+
 </head><body>
 <main class="w" id="app">
 <div class="top"><b>PERFECT STOP</b><span class="rankchip" id="rankChip">BRONZE • 0 XP</span><span><button class="iconbtn" id="soundBtn">🔊</button> <button class="iconbtn" id="statsBtn">📊</button> 🏆 <b id="points">0</b></span></div>
@@ -1371,8 +1382,8 @@ body.v22-game main.w{
  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
  const LS=localStorage;
  const n=(k,d=0)=>Number(LS.getItem(k)??d)||0;
- const coins=()=>n('psCoins',n('ps_coins',0));
- const setCoins=v=>{LS.setItem('psCoins',v);LS.setItem('ps_coins',v); refreshCoins()};
+ const coins=()=>n('psV181Coins',n('psCoins',n('ps_coins',0)));
+ const setCoins=v=>{LS.setItem('psV181Coins',v);LS.setItem('psCoins',v);LS.setItem('ps_coins',v); refreshCoins()};
  const refreshCoins=()=>{
    const v=coins();
    $$('*').forEach(()=>{});
