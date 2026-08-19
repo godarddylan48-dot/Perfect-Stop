@@ -2024,7 +2024,7 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
      await fetch(U+'/rest/v1/perfect_stop_presence?on_conflict=player_id',{
        method:'POST',
        headers:{...HD,'Prefer':'resolution=merge-duplicates,return=minimal'},
-       body:JSON.stringify({player_id:pid(),player_name:pname(),last_seen:new Date().toISOString()})
+       body:JSON.stringify({session_id:pid(),player_id:pid(),player_name:pname(),last_seen:new Date().toISOString()})
      });
    }catch(e){}
  }
@@ -2051,8 +2051,12 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')startPresence()});
  startPresence();
 
- const ver=q('.v181ver');if(ver)ver.textContent='VERSION 24.8 • CHAT & PRÉSENCE';
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 24.9 • PRÉSENCE CORRIGÉE';
 })();
+</script>
+
+<script id="v249-version-fix">
+(()=>{setTimeout(()=>{const v=document.querySelector('.v181ver');if(v)v.textContent='VERSION 24.9 • PRÉSENCE CORRIGÉE'},300);})();
 </script>
 </body></html>
 <style id="v238-continuous-style">
