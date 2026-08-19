@@ -2032,12 +2032,13 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  async function refreshCount(){
    const out=$('v248Count');if(!out)return;
    try{
-     const since=new Date(Date.now()-45000).toISOString();
-     const r=await fetch(U+'/rest/v1/perfect_stop_presence?select=player_id&last_seen=gte.'+encodeURIComponent(since),{headers:HD});
+     const r=await fetch(U+'/rest/v1/rpc/perfect_stop_online_count',{
+       method:'POST',
+       headers:HD,
+       body:'{}'
+     });
      if(!r.ok)throw 0;
-     const rows=await r.json();
-     // player_id is the PRIMARY KEY, so one player can never be counted twice.
-     const n=rows.length;
+     const n=Number(await r.json())||0;
      out.textContent=n+' joueur'+(n>1?'s':'')+' en ligne';
    }catch(e){out.textContent='Statut indisponible'}
  }
@@ -2051,12 +2052,12 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')startPresence()});
  startPresence();
 
- const ver=q('.v181ver');if(ver)ver.textContent='VERSION 24.9 • PRÉSENCE CORRIGÉE';
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 25.0 • PRÉSENCE FIABLE';
 })();
 </script>
 
 <script id="v249-version-fix">
-(()=>{setTimeout(()=>{const v=document.querySelector('.v181ver');if(v)v.textContent='VERSION 24.9 • PRÉSENCE CORRIGÉE'},300);})();
+(()=>{setTimeout(()=>{const v=document.querySelector('.v181ver');if(v)v.textContent='VERSION 25.0 • PRÉSENCE FIABLE'},300);})();
 </script>
 </body></html>
 <style id="v238-continuous-style">
