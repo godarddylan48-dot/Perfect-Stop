@@ -284,4 +284,118 @@ draw();ensurePlayer();
 })();
 </script>
 
+
+<style id="v19-style">
+/* PERFECT STOP V19 — gameplay expansion */
+.v19-mode{background:#ffffff08;border:1px solid #ffffff10;border-radius:14px;padding:12px;margin:8px 0;text-align:left}
+.v19-mode strong{display:block;font-size:15px}.v19-mode small{color:#ffffff66}
+.v19-shop{display:grid;grid-template-columns:1fr;gap:9px}
+.v19-shopitem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#ffffff08;border:1px solid #ffffff10;border-radius:14px;padding:12px;text-align:left}
+.v19-shopitem .ico{font-size:24px}.v19-buy{border:0;border-radius:10px;padding:9px 11px;background:#a35e00;color:#fff;font-weight:900}.v19-buy[disabled]{opacity:.35}
+#v19Daily{margin:10px 0;background:linear-gradient(135deg,#172447,#0a1027);border:1px solid #ffffff12;border-radius:16px;padding:12px;display:flex;justify-content:space-between;align-items:center;text-align:left}
+#v19Daily b{color:#ffd45b}.v19-claim{border:0;border-radius:10px;padding:9px 12px;background:#2d7446;color:white;font-weight:900}
+#v19Modifier{position:fixed;z-index:9500;left:50%;top:26%;transform:translate(-50%,-50%);background:#0b1027ee;border:1px solid #ffffff20;border-radius:16px;padding:12px 18px;color:white;font:900 14px system-ui;opacity:0;pointer-events:none}.v19-show{animation:v19show 1.2s ease}@keyframes v19show{0%{opacity:0;transform:translate(-50%,-60%)}20%,75%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0}}
+.v19-fog #timer{filter:blur(8px)!important;opacity:.28!important}.v19-flash #timer{animation:v19blink .45s steps(1) infinite}@keyframes v19blink{50%{opacity:.05}}
+.v19-tiny #timer{transform:scale(.72)}.v19-dark #timer{opacity:0!important}.v19-pulse #timer{animation:v19pulse .7s ease-in-out infinite}@keyframes v19pulse{50%{transform:scale(1.08)}}
+.v19-bosshud{position:fixed;top:165px;left:50%;transform:translateX(-50%);z-index:200;background:#350e0ee8;border:1px solid #ff8f3d55;border-radius:999px;padding:6px 12px;color:#fff;font:900 11px system-ui;display:none}.v19-bosshud.on{display:block}
+</style>
+
+<div id="v19Modifier"></div>
+<div class="v19-bosshud" id="v19BossHud">👑 BOSS 0/3</div>
+
+<script id="v19-features">
+(()=>{
+ const LS=localStorage,$=id=>document.getElementById(id),q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ const num=(k,d=0)=>+(LS.getItem(k)||d), put=(k,v)=>LS.setItem(k,v);
+ const cycle=()=>Math.max(1,num('psV181Cycle',1)), stage=()=>Math.max(1,num('psLevel',1)), world=()=>((cycle()-1)*5)+stage();
+ let coins=num('psV181Coins',0);
+ let inv={shield:0,focus:0,freeze:0};try{inv={...inv,...JSON.parse(LS.psV19Inv||'{}')}}catch(e){}
+ const saveInv=()=>LS.psV19Inv=JSON.stringify(inv);
+ const saveCoins=()=>LS.psV181Coins=String(coins);
+ const modifierEl=$('v19Modifier');
+ const announce=t=>{modifierEl.textContent=t;modifierEl.classList.remove('v19-show');void modifierEl.offsetWidth;modifierEl.classList.add('v19-show')};
+ const mods=[
+  {id:'normal',ico:'🎯',name:'CLASSIQUE',cls:''},
+  {id:'fog',ico:'🌫️',name:'BROUILLARD',cls:'v19-fog'},
+  {id:'flash',ico:'⚡',name:'FLASH',cls:'v19-flash'},
+  {id:'tiny',ico:'🔎',name:'MINI CHRONO',cls:'v19-tiny'},
+  {id:'dark',ico:'🌑',name:'AVEUGLE',cls:'v19-dark'},
+  {id:'pulse',ico:'💓',name:'PULSATION',cls:'v19-pulse'}
+ ];
+ const modFor=()=>stage()===5?mods[(cycle()+2)%mods.length]:mods[(world()-1)%mods.length];
+ const clearMods=()=>document.body.classList.remove(...mods.map(m=>m.cls).filter(Boolean));
+ const applyMod=()=>{
+   clearMods();const m=modFor();if(m.cls)document.body.classList.add(m.cls);
+   announce(`${m.ico} ${m.name}`);
+ };
+ const isBoss=()=>stage()===5;
+
+ // Add daily chest on home
+ const card=q('.v181card');
+ if(card && !q('#v19Daily')){
+   const day=new Date().toISOString().slice(0,10),claimed=LS.psV19Daily===day;
+   const box=document.createElement('div');box.id='v19Daily';
+   box.innerHTML=`<div>🎁 <b>COFFRE QUOTIDIEN</b><br><small>${claimed?'Déjà récupéré aujourd’hui':'+50 pièces gratuites'}</small></div><button class="v19-claim" ${claimed?'disabled':''}>${claimed?'OK':'RÉCUPÉRER'}</button>`;
+   const road=q('.v181road');road.insertAdjacentElement('afterend',box);
+   box.querySelector('button').onclick=()=>{if(LS.psV19Daily===day)return;coins+=50;saveCoins();LS.psV19Daily=day;box.querySelector('small').textContent='Déjà récupéré aujourd’hui';box.querySelector('button').disabled=true;box.querySelector('button').textContent='OK';$('v181Coins').textContent=coins}
+ }
+
+ // Add "BOOSTS" button to menu
+ const grid=q('.v181grid');
+ if(grid && !q('#v19BoostBtn')){
+   const b=document.createElement('button');b.id='v19BoostBtn';b.className='v181btn';b.textContent='🛍️ BOOSTS';
+   grid.appendChild(b);b.onclick=()=>openShop();
+ }
+ const shopHTML=()=>`
+ <div class="v19-shop">
+  <div class="v19-shopitem"><span class="ico">🛡️</span><div><b>Bouclier Boss</b><small>Protège une série de Boss ratée • Possédé: ${inv.shield}</small></div><button class="v19-buy" data-buy="shield" ${coins<75?'disabled':''}>75 🪙</button></div>
+  <div class="v19-shopitem"><span class="ico">👁️</span><div><b>Focus</b><small>Annule le modificateur du prochain essai • Possédé: ${inv.focus}</small></div><button class="v19-buy" data-buy="focus" ${coins<50?'disabled':''}>50 🪙</button></div>
+  <div class="v19-shopitem"><span class="ico">❄️</span><div><b>Gel</b><small>Affiche le chrono normalement au prochain essai • Possédé: ${inv.freeze}</small></div><button class="v19-buy" data-buy="freeze" ${coins<40?'disabled':''}>40 🪙</button></div>
+ </div>`;
+ const openShop=()=>{$('v181Title').textContent='🛍️ BOOSTS';$('v181Content').innerHTML=shopHTML();$('v181Sheet').classList.add('on')};
+ $('v181Content').addEventListener('click',e=>{
+   const b=e.target.closest('[data-buy]');if(!b)return;
+   const costs={shield:75,focus:50,freeze:40},id=b.dataset.buy,c=costs[id];
+   if(coins<c)return;coins-=c;inv[id]++;saveCoins();saveInv();$('v181Coins').textContent=coins;openShop()
+ });
+
+ // Expand levels screen with modifiers
+ qa('[data-v181="levels"]').forEach(btn=>btn.addEventListener('click',()=>{
+  setTimeout(()=>{
+   const c=$('v181Content');if(!c)return;
+   c.insertAdjacentHTML('beforeend',`<div class="v19-mode"><strong>🎮 MODIFICATEURS V19</strong><small>À partir de maintenant, chaque parcours peut ajouter Brouillard, Flash, Mini chrono, Aveugle ou Pulsation. Les Boss mélangent ces effets.</small></div>`)
+  },0)
+ }));
+
+ // Hook the game main button by text; apply modifier exactly when a new run starts.
+ document.addEventListener('click',e=>{
+   const t=e.target;
+   if(!t || !/START|REJOUER/i.test((t.textContent||'').trim()))return;
+   if(inv.focus>0||inv.freeze>0){inv.focus=Math.max(0,inv.focus-1);inv.freeze=Math.max(0,inv.freeze-1);saveInv();clearMods();announce('👁️ BOOST ACTIF • chrono normal')}
+   else applyMod();
+   const hud=$('v19BossHud');
+   if(isBoss()){hud.classList.add('on');hud.textContent=`👑 BOSS ${num('psV181Boss',0)}/3`}else hud.classList.remove('on');
+ },true);
+
+ // Boss shield: lightweight watcher, only when total attempts changes.
+ let lastA=num('psTotalAttempts'),lastW=num('psTotalWins');
+ setInterval(()=>{
+   const a=num('psTotalAttempts'),w=num('psTotalWins');
+   if(a===lastA)return;
+   if(isBoss() && w===lastW && inv.shield>0){
+     inv.shield--;saveInv();
+     // Restore one boss progress point that V18.1 would otherwise reset.
+     const prev=num('psV181Boss',0);
+     if(prev===0)LS.psV181Boss='1';
+     announce('🛡️ BOUCLIER • série Boss protégée');
+   }
+   if(isBoss())$('v19BossHud').textContent=`👑 BOSS ${num('psV181Boss',0)}/3`;
+   lastA=a;lastW=w;
+ },600);
+
+ // Version label
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 19 • MODES & BOSS';
+})();
+</script>
+
 </body></html>
