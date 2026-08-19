@@ -301,4 +301,135 @@ animation:v14fall 1.25s linear forwards}
 })();
 </script>
 
+
+<style id="v16-style">
+/* V16 CLEANUP + UNIFIED META */
+.v14-badge,#v15Hud{display:none!important}
+#v15Home{background:radial-gradient(circle at 50% 0,#17255e 0,#05091d 48%,#01030b 100%)}
+.v15logo small{display:block;font-size:11px;letter-spacing:2px;color:#ffffff66;margin-top:8px}
+.v16-homebtn{border:0;border-radius:999px;background:#ffffff0d;color:#fff;padding:5px 8px;font-size:12px}
+.v16-mission{background:#ffffff08;border:1px solid #ffffff10;border-radius:15px;padding:13px;margin:9px 0}
+.v16-mission-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.v16-progress{height:7px;background:#ffffff12;border-radius:999px;overflow:hidden;margin-top:8px}
+.v16-progress i{display:block;height:100%;background:linear-gradient(90deg,#ff9f0a,#ffd45b);border-radius:999px}
+.v16-claim{margin-top:9px;width:100%;padding:10px;border:0;border-radius:11px;background:#d48600;color:#fff;font-weight:900}
+.v16-claim[disabled]{opacity:.35}
+.v16-reward{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#ffffff08;border:1px solid #ffffff10;border-radius:15px;padding:13px;margin:9px 0;text-align:left}
+.v16-reward .ico{font-size:25px}.v16-reward small{display:block;color:#ffffff66;margin-top:2px}
+.v16-equip{border:0;border-radius:10px;padding:8px 10px;background:#ffffff12;color:#fff;font-weight:800}
+.v16-equip.on{background:#2e7447}.v16-equip.lock{opacity:.35}
+.v16-level{display:flex;align-items:center;gap:10px;background:#ffffff08;border:1px solid #ffffff10;border-radius:14px;padding:12px;margin:8px 0;text-align:left}
+.v16-level .n{width:32px;height:32px;border-radius:999px;display:grid;place-items:center;background:#ffffff10;font-weight:900}
+.v16-level.done .n{background:#2e7447}.v16-level.now{border-color:#d9952466}
+body.v16-gold{background:radial-gradient(circle at 50% 8%,#4a3414,#100c08 62%)!important}
+body.v16-neon{background:radial-gradient(circle at 50% 8%,#213153,#070815 58%,#03040b)!important}
+body.v16-diamond{background:radial-gradient(circle at 50% 8%,#17364f,#050b18 58%,#02040b)!important}
+body.v16-gold .btn{box-shadow:0 0 22px #d9a22933}
+body.v16-neon .btn{box-shadow:0 0 22px #66e2ff33}
+body.v16-diamond .btn{box-shadow:0 0 25px #9ce8ff44}
+</style>
+<script id="v16-features">
+(()=>{
+ const LS=localStorage;
+ const q=s=>document.querySelector(s);
+ const qa=s=>[...document.querySelectorAll(s)];
+ const readMeta=()=>{let m={coins:0,dailyPlays:0};try{m={...m,...JSON.parse(LS.getItem('perfectStopV14')||'{}')}}catch(e){}return m};
+ const writeMeta=m=>LS.setItem('perfectStopV14',JSON.stringify(m));
+ const xp=()=>+(LS.psXP||0),attempts=()=>+(LS.psTotalAttempts||0),wins=()=>+(LS.psTotalWins||0),bestStreak=()=>+(LS.psBestStreak||0),level=()=>+(LS.psLevel||1);
+ let claims={};try{claims=JSON.parse(LS.psV16Claims||'{}')}catch(e){}
+ const saveClaims=()=>LS.psV16Claims=JSON.stringify(claims);
+ const league=()=>xp()>=2500?'DIAMANT':xp()>=1200?'OR':xp()>=500?'ARGENT':'BRONZE';
+ const themes=[
+  {id:'classic',ico:'🥉',name:'Classique',need:'Débloqué',ok:()=>true},
+  {id:'neon',ico:'🌌',name:'Néon',need:'100 pièces',ok:()=>readMeta().coins>=100},
+  {id:'gold',ico:'🥇',name:'Or',need:'500 XP',ok:()=>xp()>=500},
+  {id:'diamond',ico:'💎',name:'Diamant',need:'2500 XP',ok:()=>xp()>=2500}
+ ];
+ const applyTheme=id=>{document.body.classList.remove('v16-neon','v16-gold','v16-diamond');if(id!=='classic')document.body.classList.add('v16-'+id);LS.psV16Theme=id};
+ applyTheme(LS.psV16Theme||'classic');
+
+ // Clean old V14/V15 overlay HUD completely.
+ qa('.v14-badge').forEach(e=>e.remove());
+ const oldHud=q('#v15Hud'); if(oldHud) oldHud.remove();
+
+ // Make menu version + unified rank/coins.
+ const logo=q('.v15logo'); if(logo && !logo.querySelector('small')) logo.insertAdjacentHTML('beforeend','<small>VERSION 16 • COMPÉTITION</small>');
+ const refreshHome=()=>{
+   const m=readMeta();
+   const lg=q('#v15League'),co=q('#v15Coins');
+   if(lg)lg.textContent=league();
+   if(co)co.textContent='🪙 '+m.coins;
+ };
+ refreshHome();
+
+ // Add a real Menu button to game top bar.
+ const stats=q('#statsBtn');
+ if(stats && !q('#v16MenuBtn')){
+   const b=document.createElement('button');b.id='v16MenuBtn';b.className='v16-homebtn';b.textContent='🏠';
+   stats.insertAdjacentElement('afterend',b);
+   b.onclick=()=>q('#v15Home')?.classList.remove('hide');
+ }
+
+ const sheet=q('#v15Sheet'),title=q('#v15Title'),content=q('#v15Content');
+ const openSheet=(name,html)=>{title.textContent=name;content.innerHTML=html;sheet.classList.add('on')};
+
+ const missionDefs=()=>[
+  {id:'attempt10',title:'Jouer 10 parties',v:attempts(),goal:10,reward:50},
+  {id:'streak3',title:'Faire une série x3',v:bestStreak(),goal:3,reward:100},
+  {id:'wins10',title:'Obtenir 10 réussites',v:wins(),goal:10,reward:150}
+ ];
+ const missionHTML=()=>missionDefs().map(m=>{
+   const done=m.v>=m.goal,claimed=claims[m.id];
+   return `<div class="v16-mission"><div class="v16-mission-head"><span>${done?'✅':'🎯'} ${m.title}</span><b>${Math.min(m.v,m.goal)}/${m.goal}</b></div>
+   <div class="v16-progress"><i style="width:${Math.min(100,m.v/m.goal*100)}%"></i></div>
+   <button class="v16-claim" data-claim="${m.id}" ${(!done||claimed)?'disabled':''}>${claimed?'RÉCUPÉRÉ':`RÉCUPÉRER +${m.reward} 🪙`}</button></div>`
+ }).join('');
+
+ const profileHTML=()=>{let m=readMeta(),a=attempts(),w=wins();return `
+  <div class="v15mission"><span>Ligue</span><b>${league()}</b></div>
+  <div class="v15mission"><span>XP</span><b>${xp()}</b></div>
+  <div class="v15mission"><span>Pièces</span><b>${m.coins}</b></div>
+  <div class="v15mission"><span>Essais total</span><b>${a}</b></div>
+  <div class="v15mission"><span>Réussites</span><b>${w}</b></div>
+  <div class="v15mission"><span>Taux de réussite</span><b>${a?Math.round(w/a*100):0}%</b></div>
+  <div class="v15mission"><span>Meilleure série</span><b>x${bestStreak()}</b></div>`};
+
+ const levelsHTML=()=>{
+  const names=['Échauffement','Disparition','Mémoire','Cible Random','Aveugle Total'],icons=['🎯','👻','🧠','🎲','👑'],lv=level();
+  return names.map((n,i)=>`<div class="v16-level ${i+1<lv?'done':i+1===lv?'now':''}"><span class="n">${i+1}</span><div><b>${icons[i]} ${n}</b><small style="display:block;color:#ffffff66">${i+1<lv?'Terminé':i+1===lv?'Niveau actuel':'À débloquer'}</small></div></div>`).join('')
+ };
+ const rewardsHTML=()=>{
+  const equipped=LS.psV16Theme||'classic';
+  return themes.map(t=>`<div class="v16-reward"><span class="ico">${t.ico}</span><div><b>${t.name}</b><small>${t.need}</small></div>
+   <button class="v16-equip ${equipped===t.id?'on':''} ${!t.ok()?'lock':''}" data-theme="${t.id}" ${!t.ok()?'disabled':''}>${equipped===t.id?'ÉQUIPÉ':'CHOISIR'}</button></div>`).join('')
+ };
+
+ qa('[data-v15]').forEach(b=>{
+  b.onclick=()=>{
+   const type=b.dataset.v15;
+   if(type==='missions')openSheet('🎯 MISSIONS',missionHTML());
+   if(type==='stats')openSheet('📊 PROFIL',profileHTML());
+   if(type==='levels')openSheet('🗺️ NIVEAUX',levelsHTML());
+   if(type==='rewards')openSheet('🏆 RÉCOMPENSES',rewardsHTML());
+  }
+ });
+
+ content?.addEventListener('click',e=>{
+  const c=e.target.closest('[data-claim]');
+  if(c){
+    const m=missionDefs().find(x=>x.id===c.dataset.claim);
+    if(m && m.v>=m.goal && !claims[m.id]){
+      let meta=readMeta();meta.coins=(meta.coins||0)+m.reward;writeMeta(meta);claims[m.id]=true;saveClaims();refreshHome();
+      openSheet('🎯 MISSIONS',missionHTML());
+    }
+  }
+  const t=e.target.closest('[data-theme]');
+  if(t && !t.disabled){applyTheme(t.dataset.theme);openSheet('🏆 RÉCOMPENSES',rewardsHTML())}
+ });
+
+ // Keep menu numbers genuinely synced with game storage.
+ setInterval(refreshHome,500);
+})();
+</script>
+
 </body></html>
