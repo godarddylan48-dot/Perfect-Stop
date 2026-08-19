@@ -1871,7 +1871,7 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
    }`;
  document.head.appendChild(st);
  const ver=q('.v181ver');
- if(ver)ver.textContent='VERSION 24.5 • ACCUEIL COMPACT';
+ if(ver)ver.textContent='VERSION 25.8 • BOUTIQUE';
 })();
 </script>
 
@@ -1970,7 +1970,7 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
     }
   }
   const v=q('.v181ver');
-  if(v)v.textContent='VERSION 24.5 • ACCUEIL COMPACT';
+  if(v)v.textContent='VERSION 25.8 • BOUTIQUE';
 })();
 </script>
 
@@ -2189,6 +2189,148 @@ body.v255-playing #v252ReplayBtn{display:none!important}
 })();
 </script>
 
+
+<style id="v258-shop-style">
+#v258Shop{position:fixed;inset:0;z-index:100500;background:#000c;display:none;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top) + 18px) 14px 92px;overflow:auto}
+#v258Shop.on{display:flex}
+.v258panel{width:min(100%,470px);background:#020719;border:1px solid #ffffff12;border-radius:24px;padding:18px;color:#fff;box-shadow:0 24px 70px #000d}
+.v258head{display:flex;align-items:center;justify-content:space-between}.v258head h2{margin:0;font-size:25px}.v258x{width:42px;height:42px;border:0;border-radius:50%;background:#ffffff09;color:#fff;font-size:22px}
+.v258bal{margin:10px 0 12px;padding:10px 12px;border-radius:14px;background:#ffffff06;border:1px solid #ffffff0d;font-weight:900;color:#d8a528}
+.v258tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.v258tab{border:0;border-radius:12px;padding:10px 5px;background:#111a38;color:#c7c9d3;font-weight:900}.v258tab.on{background:#57338f;color:#fff}
+.v258item{display:grid;grid-template-columns:54px 1fr auto;gap:10px;align-items:center;padding:12px;margin:9px 0;border-radius:16px;background:#ffffff05;border:1px solid #ffffff0d;text-align:left}
+.v258preview{height:48px;border-radius:11px;background:#091022;display:grid;place-items:center;font-size:19px;font-weight:1000}
+.v258item b{display:block}.v258item small{display:block;color:#ffffff70;margin-top:3px}
+.v258buy{border:0;border-radius:11px;padding:9px 10px;min-width:84px;background:#8b5600;color:#fff;font-weight:900}.v258buy.equip{background:#1f7041}.v258buy[disabled]{opacity:.45}
+.v258-neon{color:#ff68ff;text-shadow:0 0 10px #d827ff}.v258-gold{color:#ffd44d;text-shadow:0 0 10px #ffb000}.v258-ice{color:#7ee8ff;text-shadow:0 0 10px #43cfff}
+body.v258theme-neon #timer{color:#ff65ff!important;text-shadow:0 0 14px #d82cff,0 0 28px #6c1bff}
+body.v258theme-gold #timer{color:#ffd34d!important;text-shadow:0 0 14px #ffaf00}
+body.v258theme-ice #timer{color:#8fefff!important;text-shadow:0 0 14px #2bd9ff}
+body.v258frame-bronze #v234Profile .v234panel{border:2px solid #b77445!important;box-shadow:0 0 24px #b7744533}
+body.v258frame-gold #v234Profile .v234panel{border:2px solid #e3b42a!important;box-shadow:0 0 28px #e3b42a44}
+body.v258frame-diamond #v234Profile .v234panel{border:2px solid #78dfff!important;box-shadow:0 0 30px #78dfff44}
+body.v258frame-legend #v234Profile .v234panel{border:2px solid #b95cff!important;box-shadow:0 0 34px #b95cff66}
+#v258Fx{position:fixed;inset:0;pointer-events:none;z-index:100600;overflow:hidden}
+#v258Fx span{position:absolute;font-size:26px;animation:v258fall 1.2s ease-out forwards}
+@keyframes v258fall{0%{transform:translateY(0) scale(.5);opacity:0}20%{opacity:1}100%{transform:translateY(-150px) scale(1.4);opacity:0}}
+.v258shopbtn{width:100%;margin-top:12px;border:0;border-radius:14px;padding:13px;background:linear-gradient(90deg,#5c2f94,#814cb8);color:white;font-weight:1000;font-size:15px}
+</style>
+<div id="v258Shop">
+ <div class="v258panel">
+  <div class="v258head"><h2>🛒 Boutique</h2><button class="v258x">×</button></div>
+  <div class="v258bal">🪙 Solde : <span id="v258Balance">0</span></div>
+  <div class="v258tabs"><button class="v258tab on" data-tab="theme">🎨 Thèmes</button><button class="v258tab" data-tab="effect">✨ Effets</button><button class="v258tab" data-tab="frame">🖼️ Cadres</button></div>
+  <div id="v258Items"></div>
+ </div>
+</div>
+<div id="v258Fx"></div>
+<script id="v258-shop-script">
+(()=>{
+ const LS=localStorage,$=id=>document.getElementById(id),q=s=>document.querySelector(s);
+ const coins=()=>Number(LS.getItem('psV181Coins')||0)||0;
+ const setCoins=v=>{v=Math.max(0,Math.floor(v));LS.setItem('psV181Coins',v);LS.setItem('psCoins',v);LS.setItem('ps_coins',v);syncCoins()};
+ const syncCoins=()=>{
+   const v=coins(),b=$('v258Balance');if(b)b.textContent=v;
+   const h=$('v181Coins');if(h)h.textContent=v;
+   document.querySelectorAll('[data-coins]').forEach(e=>e.textContent=v);
+ };
+ const defs={
+  theme:[
+   ['classic','⚪','Classique','Style d’origine',0,''],
+   ['neon','💜','Néon','Chrono violet lumineux',300,'v258-neon'],
+   ['ice','🧊','Glace','Chrono bleu glacé',400,'v258-ice'],
+   ['gold','👑','Or','Chrono doré de champion',500,'v258-gold']
+  ],
+  effect:[
+   ['none','☆','Aucun','Effet désactivé',0,''],
+   ['spark','✨','Étincelles','Petites étincelles après un gros score',200,''],
+   ['confetti','🎉','Confettis','Pluie de confettis après une réussite',300,''],
+   ['nova','💥','Super Nova','Explosion visuelle après une réussite',400,'']
+  ],
+  frame:[
+   ['none','◯','Aucun','Cadre par défaut',0,''],
+   ['bronze','🥉','Bronze','Cadre bronze',100,''],
+   ['gold','🥇','Or','Cadre doré',300,''],
+   ['diamond','💎','Diamant','Cadre bleu brillant',500,''],
+   ['legend','👑','Légende','Cadre violet premium',800,'']
+  ]
+ };
+ function owned(type,id){return id==='classic'||id==='none'||LS.getItem('psShop_'+type+'_'+id)==='1'}
+ function equipped(type){return LS.getItem('psEquip_'+type)||(type==='theme'?'classic':'none')}
+ function apply(){
+   [...document.body.classList].filter(c=>c.startsWith('v258theme-')||c.startsWith('v258frame-')).forEach(c=>document.body.classList.remove(c));
+   const t=equipped('theme'),f=equipped('frame');
+   if(t!=='classic')document.body.classList.add('v258theme-'+t);
+   if(f!=='none')document.body.classList.add('v258frame-'+f);
+ }
+ function render(type){
+   $('v258Items').innerHTML=defs[type].map(([id,ico,name,desc,price,cls])=>{
+     const own=owned(type,id),eq=equipped(type)===id;
+     const label=eq?'ÉQUIPÉ':own?'ÉQUIPER':price+' 🪙';
+     return `<div class="v258item">
+       <div class="v258preview ${cls}">${ico}</div>
+       <div><b>${name}</b><small>${desc}</small></div>
+       <button class="v258buy ${own&&!eq?'equip':''}" data-type="${type}" data-id="${id}" data-price="${price}" ${eq?'disabled':''}>${label}</button>
+     </div>`
+   }).join('');
+   $('v258Items').querySelectorAll('.v258buy').forEach(b=>b.onclick=()=>{
+     const type=b.dataset.type,id=b.dataset.id,price=+b.dataset.price;
+     if(!owned(type,id)){
+       if(coins()<price){b.textContent='PAS ASSEZ';return}
+       setCoins(coins()-price);LS.setItem('psShop_'+type+'_'+id,'1');
+     }
+     LS.setItem('psEquip_'+type,id);apply();render(type);syncCoins();
+   });
+ }
+ function openShop(){
+   syncCoins();$('v258Shop').classList.add('on');
+   document.querySelectorAll('.v258tab').forEach(x=>x.classList.toggle('on',x.dataset.tab==='theme'));
+   render('theme');
+ }
+ $('v258Shop').querySelector('.v258x').onclick=()=>$('v258Shop').classList.remove('on');
+ $('v258Shop').onclick=e=>{if(e.target===$('v258Shop'))$('v258Shop').classList.remove('on')};
+ document.querySelectorAll('.v258tab').forEach(b=>b.onclick=()=>{
+   document.querySelectorAll('.v258tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');render(b.dataset.tab);
+ });
+ window.v258OpenShop=openShop;
+
+ // Add shop button to both existing profile interfaces without touching Home.
+ const injectProfileButtons=()=>{
+   const p=$('v234Profile');
+   if(p&&p.classList.contains('on')&&!p.querySelector('#v258ProfileShop')){
+     const panel=p.querySelector('.v234panel');
+     if(panel){const b=document.createElement('button');b.id='v258ProfileShop';b.className='v258shopbtn';b.textContent='🛒 BOUTIQUE';b.onclick=openShop;panel.appendChild(b)}
+   }
+   const pb=$('v22ProfileButtons');
+   if(pb&&!pb.querySelector('#v258V22Shop')){
+     const b=document.createElement('button');b.id='v258V22Shop';b.className='v22quick';b.textContent='🛒 Boutique';b.onclick=openShop;pb.appendChild(b);
+   }
+ };
+ setInterval(injectProfileButtons,300);
+
+ // Cosmetic success effects.
+ function burst(kind){
+   const root=$('v258Fx');if(!root)return;
+   const chars=kind==='spark'?['✨','✦','✨']:kind==='confetti'?['🎉','🔸','🔹','🟡','🟣']:['💥','✨','🌟','💫'];
+   for(let i=0;i<(kind==='nova'?18:12);i++){
+     const e=document.createElement('span');e.textContent=chars[i%chars.length];
+     e.style.left=(20+Math.random()*60)+'%';e.style.top=(55+Math.random()*20)+'%';
+     e.style.animationDelay=(Math.random()*.18)+'s';root.appendChild(e);setTimeout(()=>e.remove(),1500);
+   }
+ }
+ const res=$('result');
+ if(res){
+   new MutationObserver(()=>{
+     const t=(res.innerText||'').toUpperCase();
+     if(/RÉUSSI|PERFECT|NOUVEAU RECORD/.test(t)){
+       const fx=equipped('effect');if(fx!=='none')burst(fx);
+     }
+   }).observe(res,{childList:true,subtree:true,characterData:true});
+ }
+ apply();syncCoins();
+})();
+</script>
+
 </body></html>
 <style id="v238-continuous-style">
 #v19BossHud{display:none!important}
@@ -2277,7 +2419,7 @@ font-size:11px;font-weight:900;letter-spacing:.5px;background:rgba(255,255,255,.
    q('.v181play')?.insertAdjacentElement('beforebegin',box);
  }
  setTimeout(homeKing,500);
- function version(){const v=q('.v181ver');if(v)v.textContent='VERSION 24.5 • ACCUEIL COMPACT'}
+ function version(){const v=q('.v181ver');if(v)v.textContent='VERSION 25.8 • BOUTIQUE'}
  setTimeout(version,100);setTimeout(version,1400);
 })();
 </script>
