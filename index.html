@@ -728,4 +728,196 @@ body.v22-game main.w{padding-bottom:84px}
 })();
 </script>
 
+
+<style id="v23-style">
+/* PERFECT STOP V23 — COMPETITION */
+#v23Arena{position:fixed;inset:0;z-index:14000;background:radial-gradient(circle at 50% 0,#17235d,#040715 60%);display:none;color:#fff;font-family:system-ui;overflow:auto;padding:18px 18px 90px}
+#v23Arena.on{display:block}.v23head{display:flex;align-items:center;justify-content:space-between;gap:12px}.v23head h2{margin:0}.v23x{border:0;border-radius:999px;background:#ffffff10;color:#fff;padding:9px 11px}
+.v23tabs{display:flex;gap:6px;overflow:auto;margin:14px 0;padding-bottom:3px}.v23tab{border:0;border-radius:999px;padding:9px 12px;background:#ffffff0c;color:#aaa;font-weight:900;white-space:nowrap}.v23tab.on{background:#a86805;color:#fff}
+.v23box{background:#ffffff08;border:1px solid #ffffff10;border-radius:16px;padding:14px;margin:10px 0}.v23row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #ffffff0b}.v23row:last-child{border-bottom:0}.v23row b{display:block}.v23row small{color:#ffffff69}
+.v23challenge{border:0;border-radius:10px;padding:9px 11px;background:#7d4600;color:#fff;font-weight:900}.v23challenge:disabled{opacity:.35}
+.v23live{display:inline-flex;gap:6px;align-items:center;color:#bdf6cd}.v23live i{width:8px;height:8px;border-radius:50%;background:#32d477;box-shadow:0 0 8px #32d477}
+#v23Duel{position:fixed;inset:0;z-index:15000;background:radial-gradient(circle at 50% 0,#29124e,#040612 65%);display:none;place-items:center;color:#fff;font-family:system-ui;padding:20px}#v23Duel.on{display:grid}
+.v23duelcard{width:min(92vw,420px);text-align:center;background:#0d1125;border:1px solid #ffffff15;border-radius:24px;padding:22px}.v23target{font-size:48px;font-weight:1000}.v23timer{font-size:70px;font-weight:1000;margin:18px 0;font-variant-numeric:tabular-nums}.v23duelbtn{width:100%;border:0;border-radius:16px;padding:17px;background:#fff;color:#111;font-weight:1000;font-size:21px}.v23status{min-height:44px;margin-top:12px;color:#ffffffaa}
+#v23Tour{position:fixed;inset:0;z-index:15000;background:radial-gradient(circle at 50% 0,#133e43,#030811 65%);display:none;place-items:center;color:#fff;font-family:system-ui;padding:20px}#v23Tour.on{display:grid}
+.v23badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#ffffff0c;font-size:10px;color:#ffd45b}
+#v23Incoming{position:fixed;z-index:13000;top:86px;left:50%;transform:translateX(-50%);background:#29144dea;border:1px solid #a98cff55;color:#fff;border-radius:15px;padding:11px 14px;font:900 12px system-ui;display:none;box-shadow:0 15px 40px #0008}#v23Incoming.on{display:block}
+.v23medal{font-size:17px}.v23score{color:#ffd45b;font-weight:900}
+</style>
+
+<div id="v23Incoming">⚔️ Nouveau défi reçu !</div>
+
+<section id="v23Arena">
+ <div class="v23head"><h2>⚔️ Compétition</h2><button class="v23x" id="v23Close">✕</button></div>
+ <div class="v23tabs">
+  <button class="v23tab on" data-v23tab="online">👥 En ligne</button>
+  <button class="v23tab" data-v23tab="season">🏆 Saison</button>
+  <button class="v23tab" data-v23tab="path">🛣️ Parcours</button>
+  <button class="v23tab" data-v23tab="chrono">🎯 Chrono</button>
+  <button class="v23tab" data-v23tab="wins">⚔️ Victoires</button>
+  <button class="v23tab" data-v23tab="tour">📅 Tournoi</button>
+ </div>
+ <div id="v23ArenaContent"></div>
+</section>
+
+<section id="v23Duel">
+ <div class="v23duelcard">
+  <div class="v23badge">⚔️ DUEL</div>
+  <h2 id="v23DuelVs">VS</h2>
+  <div>ARRÊTE LE TEMPS À</div><div class="v23target" id="v23DuelTarget">8.00</div>
+  <div class="v23timer" id="v23DuelTimer">0.000</div>
+  <button class="v23duelbtn" id="v23DuelBtn">START</button>
+  <div class="v23status" id="v23DuelStatus"></div>
+  <button class="v23x" id="v23DuelClose">Quitter</button>
+ </div>
+</section>
+
+<section id="v23Tour">
+ <div class="v23duelcard">
+  <div class="v23badge">📅 TOURNOI DU JOUR</div>
+  <h2>Même cible pour tout le monde</h2>
+  <div>ARRÊTE LE TEMPS À</div><div class="v23target" id="v23TourTarget">9.00</div>
+  <div class="v23timer" id="v23TourTimer">0.000</div>
+  <button class="v23duelbtn" id="v23TourBtn">START</button>
+  <div class="v23status" id="v23TourStatus"></div>
+  <button class="v23x" id="v23TourClose">Quitter</button>
+ </div>
+</section>
+
+<script id="v23-features">
+(()=>{
+ const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
+ const HD={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'};
+ const LS=localStorage,$=id=>document.getElementById(id),q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ const num=(k,d=0)=>+(LS.getItem(k)||d);
+ const pid=()=>LS.psPid||'', pname=()=>LS.psName||'Joueur';
+ const world=()=>((Math.max(1,num('psV181Cycle',1))-1)*5)+Math.max(1,num('psLevel',1));
+ const stage=()=>Math.max(1,num('psLevel',1));
+ const bestErr=()=>{try{let a=JSON.parse(LS.psLevelBests||'[]').filter(x=>typeof x==='number');return a.length?Math.round(Math.min(...a)*1000):null}catch(e){return null}};
+ const rank=x=>x>=5000?'💎 Diamant':x>=2500?'🏆 Platine':x>=1200?'🥇 Or':x>=500?'🥈 Argent':'🥉 Bronze';
+ async function rpc(n,b){try{let r=await fetch(U+'/rest/v1/rpc/'+n,{method:'POST',headers:HD,body:JSON.stringify(b||{})});if(!r.ok)return null;return await r.json()}catch(e){return null}}
+ async function get(path){try{let r=await fetch(U+'/rest/v1/'+path,{headers:HD});if(!r.ok)return[];return await r.json()}catch(e){return[]}}
+ const esc=s=>String(s||'').replace(/[&<>"']/g,'');
+ const arena=$('v23Arena'),content=$('v23ArenaContent');
+ let maxWorld=Math.max(num('psV23MaxWorld',1),world());LS.psV23MaxWorld=String(maxWorld);
+
+ async function sync(){
+  if(!pid())return;
+  maxWorld=Math.max(maxWorld,world());LS.psV23MaxWorld=String(maxWorld);
+  await rpc('perfect_stop_sync_progress',{
+   p_player_id:pid(),p_player_name:pname(),p_xp:num('psXP'),p_coins:num('psV181Coins'),
+   p_world_level:maxWorld,p_max_level:Math.max(stage(),num('psV23MaxStage',1)),
+   p_wins:num('psTotalWins'),p_best_streak:num('psBestStreak'),p_best_error_ms:bestErr()
+  });
+ }
+ sync();setInterval(sync,30000);
+ let lastAttempts=num('psTotalAttempts');
+ setInterval(()=>{let a=num('psTotalAttempts');if(a!==lastAttempts){lastAttempts=a;sync()}},1200);
+
+ function row(p,i,mode){
+  const medal=i<3?['🥇','🥈','🥉'][i]:`${i+1}.`;
+  let score=mode==='chrono'?(p.best_error_ms==null?'—':(p.best_error_ms/1000).toFixed(3)+'s'):
+            mode==='wins'?`${p.duel_wins||0} vic.`:
+            `Parcours ${p.world_level||1}`;
+  return `<div class="v23row"><div><b><span class=v23medal>${medal}</span> ${esc(p.player_name)}</b><small>${rank(p.xp||0)} • Parcours ${p.world_level||1} • Niveau max ${p.max_level||1} • 🔥 ${p.best_streak||0}</small></div><span class=v23score>${score}</span></div>`
+ }
+ async function renderRanking(mode){
+  content.innerHTML='<div class=v23box>Chargement…</div>';
+  let order=mode==='chrono'?'best_error_ms.asc.nullslast':mode==='wins'?'duel_wins.desc,world_level.desc':mode==='season'?'xp.desc,world_level.desc':'world_level.desc,xp.desc';
+  let a=await get('perfect_stop_progress?select=player_id,player_name,xp,world_level,max_level,wins,best_streak,best_error_ms,duel_wins&order='+encodeURIComponent(order)+'&limit=50');
+  content.innerHTML=`<div class=v23box><b>${mode==='chrono'?'🎯 Meilleur chrono':mode==='wins'?'⚔️ Victoires en duel':mode==='season'?'🏆 Classement saison':'🛣️ Parcours maximum'}</b><small> • ${a.length} joueur(s)</small></div>`+
+    (a.map((p,i)=>row(p,i,mode)).join('')||'<div class=v23box>Aucun joueur classé.</div>')
+ }
+ async function renderOnline(){
+  content.innerHTML='<div class=v23box>Recherche des joueurs en ligne…</div>';
+  let a=await rpc('perfect_stop_active_players',{});
+  if(!Array.isArray(a))a=[];
+  content.innerHTML=`<div class=v23box><span class=v23live><i></i><b>${a.length} joueur${a.length>1?'s':''} en ligne</b></span><small style="display:block;margin-top:4px;color:#ffffff66">Tu peux lancer un duel à un joueur connecté.</small></div>`+
+  (a.map(p=>`<div class=v23row><div><b>${esc(p.player_name)} ${p.player_id===pid()?'(toi)':''}</b><small>${rank(p.xp||0)} • Parcours ${p.world_level||1} • ⚔️ ${p.duel_wins||0}</small></div><button class=v23challenge data-duel="${esc(p.player_id)}" data-name="${esc(p.player_name)}" ${p.player_id===pid()?'disabled':''}>Défier</button></div>`).join('')||'<div class=v23box>Personne en ligne pour le moment.</div>');
+ }
+ async function renderTournament(){
+  const day=new Date().toISOString().slice(0,10);
+  let a=await get('perfect_stop_tournament_daily?select=player_name,error_ms,world_level&day=eq.'+day+'&order=error_ms.asc&limit=20');
+  content.innerHTML='<div class=v23box><b>📅 Tournoi du jour</b><small style="display:block;color:#ffffff66">Même cible pour tout le monde. Ton meilleur essai de la journée est conservé.</small><button class=v23challenge id=v23PlayTour style="margin-top:10px">Participer</button></div>'+
+   (a.map((x,i)=>`<div class=v23row><div><b>${i<3?['🥇','🥈','🥉'][i]:i+1+'.'} ${esc(x.player_name)}</b><small>Parcours ${x.world_level}</small></div><span class=v23score>${(x.error_ms/1000).toFixed(3)}s</span></div>`).join('')||'<div class=v23box>Sois le premier aujourd’hui !</div>');
+  q('#v23PlayTour')?.addEventListener('click',startTournament);
+ }
+ async function renderTab(t){
+  qa('[data-v23tab]').forEach(b=>b.classList.toggle('on',b.dataset.v23tab===t));
+  if(t==='online')return renderOnline();
+  if(t==='tour')return renderTournament();
+  return renderRanking(t)
+ }
+ qa('[data-v23tab]').forEach(b=>b.onclick=()=>renderTab(b.dataset.v23tab));
+ $('v23Close').onclick=()=>arena.classList.remove('on');
+
+ // Replace V22 ranking nav with Competition.
+ const rankNav=q('[data-v22="rank"]');
+ if(rankNav){rankNav.innerHTML='<span>⚔️</span>Compétition';rankNav.onclick=()=>{arena.classList.add('on');renderTab('online')}}
+ // Add quick online shortcut on home.
+ const quick=$('v22Quick');
+ if(quick && !q('#v23OnlineQuick')){
+   const b=document.createElement('button');b.id='v23OnlineQuick';b.className='v22quick';b.textContent='👥 Joueurs en ligne';quick.appendChild(b);b.onclick=()=>{arena.classList.add('on');renderTab('online')}
+ }
+
+ // DUELS
+ let duel=null,duelRun=false,duelStart=0,duelRAF=0;
+ content.addEventListener('click',async e=>{
+   const b=e.target.closest('[data-duel]');if(!b)return;
+   const id=await rpc('perfect_stop_create_duel',{p_challenger_id:pid(),p_challenger_name:pname(),p_opponent_id:b.dataset.duel,p_opponent_name:b.dataset.name});
+   if(id){let rows=await get('perfect_stop_duels?select=*&id=eq.'+id);if(rows[0])openDuel(rows[0],b.dataset.name)}
+ });
+ function openDuel(d,other){
+  duel=d;arena.classList.remove('on');$('v23Duel').classList.add('on');$('v23DuelVs').textContent=`${pname()} VS ${other}`;
+  $('v23DuelTarget').textContent=(d.target_ms/1000).toFixed(2);$('v23DuelTimer').textContent='0.000';$('v23DuelBtn').textContent='START';$('v23DuelStatus').textContent='Même cible pour les deux joueurs.';duelRun=false
+ }
+ function duelLoop(n){if(!duelRun)return;let x=(n-duelStart)/1000;$('v23DuelTimer').textContent=x.toFixed(3);duelRAF=requestAnimationFrame(duelLoop)}
+ $('v23DuelBtn').onclick=async()=>{
+  if(!duel)return;
+  if(!duelRun){duelRun=true;duelStart=performance.now();$('v23DuelBtn').textContent='STOP';$('v23DuelStatus').textContent='Arrête au bon moment !';duelRAF=requestAnimationFrame(duelLoop)}
+  else{
+   duelRun=false;cancelAnimationFrame(duelRAF);let x=(performance.now()-duelStart)/1000,d=Math.abs(duel.target_ms/1000-x),ms=Math.round(d*1000);
+   $('v23DuelTimer').textContent=x.toFixed(3);$('v23DuelBtn').disabled=true;$('v23DuelStatus').textContent=`Ton écart : ${d.toFixed(3)}s • attente de l’adversaire…`;
+   await rpc('perfect_stop_submit_duel',{p_duel_id:duel.id,p_player_id:pid(),p_error_ms:ms});
+   setTimeout(checkDuel,1200)
+  }
+ };
+ async function checkDuel(){
+  if(!duel)return;let a=await get('perfect_stop_duels?select=*&id=eq.'+duel.id),d=a[0];if(!d)return;
+  if(d.status==='finished'){
+   let txt=d.winner_id==='draw'?'🤝 Égalité':d.winner_id===pid()?'🏆 TU AS GAGNÉ !':'❌ Duel perdu';
+   $('v23DuelStatus').textContent=`${txt} • ${((pid()===d.challenger_id?d.challenger_error_ms:d.opponent_error_ms)||0)/1000}s vs ${((pid()===d.challenger_id?d.opponent_error_ms:d.challenger_error_ms)||0)/1000}s`;sync()
+  }else setTimeout(checkDuel,2000)
+ }
+ $('v23DuelClose').onclick=()=>{$('v23Duel').classList.remove('on');$('v23DuelBtn').disabled=false;duel=null};
+
+ // Incoming duel notifications
+ let incomingSeen='';
+ async function checkIncoming(){
+  if(!pid())return;
+  let a=await get('perfect_stop_duels?select=*&opponent_id=eq.'+encodeURIComponent(pid())+'&status=eq.pending&order=created_at.desc&limit=1');
+  if(a[0] && a[0].id!==incomingSeen){
+   incomingSeen=a[0].id;const n=$('v23Incoming');n.textContent=`⚔️ ${a[0].challenger_name} te défie ! Appuie ici`;n.classList.add('on');
+   n.onclick=()=>{n.classList.remove('on');openDuel(a[0],a[0].challenger_name)}
+  }
+ }
+ checkIncoming();setInterval(checkIncoming,10000);
+
+ // TOURNAMENT
+ let tourRun=false,tourStart=0,tourRAF=0;
+ function tourTarget(){let d=new Date(),seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();return 7+(seed%301)/100}
+ function startTournament(){
+  arena.classList.remove('on');$('v23Tour').classList.add('on');$('v23TourTarget').textContent=tourTarget().toFixed(2);$('v23TourTimer').textContent='0.000';$('v23TourBtn').textContent='START';$('v23TourBtn').disabled=false;$('v23TourStatus').textContent='Un essai, puis tu peux recommencer pour améliorer ton score.'
+ }
+ function tourLoop(n){if(!tourRun)return;let x=(n-tourStart)/1000;$('v23TourTimer').textContent=x.toFixed(3);tourRAF=requestAnimationFrame(tourLoop)}
+ $('v23TourBtn').onclick=async()=>{
+  if(!tourRun){tourRun=true;tourStart=performance.now();$('v23TourBtn').textContent='STOP';tourRAF=requestAnimationFrame(tourLoop)}
+  else{tourRun=false;cancelAnimationFrame(tourRAF);let x=(performance.now()-tourStart)/1000,d=Math.abs(tourTarget()-x),ms=Math.round(d*1000);$('v23TourTimer').textContent=x.toFixed(3);$('v23TourStatus').textContent=`Écart : ${d.toFixed(3)}s • score envoyé !`;$('v23TourBtn').textContent='REJOUER';await rpc('perfect_stop_submit_tournament',{p_player_id:pid(),p_player_name:pname(),p_error_ms:ms,p_world_level:maxWorld})}
+ };
+ $('v23TourClose').onclick=()=>{$('v23Tour').classList.remove('on');tourRun=false;cancelAnimationFrame(tourRAF)};
+
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 23 • COMPÉTITION MULTIJOUEUR';
+})();
+</script>
+
 </body></html>
