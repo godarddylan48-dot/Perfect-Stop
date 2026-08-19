@@ -1179,4 +1179,117 @@ body.v22-game main.w{
 })();
 </script>
 
+
+<style id="v234-polish-fixes">
+/* V23.4 polish */
+.v181play{
+  box-shadow:0 10px 30px #7b160040, inset 0 1px 0 #ffffff12!important;
+  letter-spacing:.4px!important;
+}
+.v181play:active{transform:scale(.985)!important}
+.v181road{padding:10px 13px!important}
+#v233Info .v233card{
+  background:linear-gradient(145deg,#ffffff09,#ffffff03)!important;
+  border:1px solid #d9a52a22!important;
+}
+#v233Info .big{font-size:20px!important}
+
+/* shared modal shell */
+.v234modal{
+ position:fixed;inset:0;z-index:99990;background:#000a;
+ display:none;align-items:flex-start;justify-content:center;
+ padding:calc(env(safe-area-inset-top) + 24px) 16px 90px;overflow:auto
+}
+.v234modal.on{display:flex}
+.v234panel{
+ width:min(100%,460px);background:#020719;border:1px solid #ffffff12;
+ border-radius:24px;padding:20px;box-shadow:0 24px 70px #000c;color:white
+}
+.v234head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.v234head h2{margin:0;font-size:25px}
+.v234x{border:0;background:#ffffff08;color:white;border-radius:50%;width:42px;height:42px;font-size:22px}
+.v234grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.v234stat,.v234item{border:1px solid #ffffff0d;background:#ffffff05;border-radius:16px;padding:13px}
+.v234stat small,.v234muted{color:#ffffff70;font-size:11px}
+.v234stat b{display:block;font-size:20px;color:#d9a52a;margin-top:4px}
+.v234item{display:flex;align-items:center;gap:11px;margin:9px 0}
+.v234ico{font-size:27px;width:34px;text-align:center}
+.v234grow{flex:1}
+.v234grow b{display:block;font-size:15px}
+.v234grow small{color:#ffffff70}
+.v234buy{border:0;border-radius:12px;padding:9px 11px;background:#6b250b;color:white;font-weight:800}
+.v234buy:disabled{opacity:.4}
+.v234badge{padding:5px 8px;border-radius:10px;background:#d9a52a18;color:#d9a52a;font-size:11px;font-weight:800}
+</style>
+
+<script id="v234-fixes">
+(()=>{
+ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+ const LS=localStorage;
+ const n=(k,d=0)=>Number(LS.getItem(k)??d)||0;
+ const coins=()=>n('psCoins',n('ps_coins',0));
+ const setCoins=v=>{LS.setItem('psCoins',v);LS.setItem('ps_coins',v); refreshCoins()};
+ const refreshCoins=()=>{
+   const v=coins();
+   $$('*').forEach(()=>{});
+   const candidates=$$('.v181coins,#v20Coins,#v19Coins,[data-coins]');
+   candidates.forEach(e=>e.textContent=v);
+ };
+ const modal=(id,title,body)=>{
+   let m=document.getElementById(id);
+   if(!m){m=document.createElement('div');m.id=id;m.className='v234modal';document.body.appendChild(m)}
+   m.innerHTML=`<div class="v234panel"><div class="v234head"><h2>${title}</h2><button class="v234x">×</button></div>${body}</div>`;
+   m.classList.add('on'); m.querySelector('.v234x').onclick=()=>m.classList.remove('on');
+   m.onclick=e=>{if(e.target===m)m.classList.remove('on')}; return m;
+ };
+ const best=()=>{try{let a=JSON.parse(LS.psLevelBests||'[]').filter(x=>Number.isFinite(x));return a.length?Math.min(...a):null}catch(e){return null}};
+ const profile=()=>{
+   const tries=n('psTotalAttempts',n('psAttempts',0)), wins=n('psTotalWins',n('psWins',0));
+   const streak=n('psBestStreak',0), path=n('psPath',n('psCurrentPath',1));
+   modal('v234Profile','📊 Profil',`
+    <div class="v234grid">
+     <div class="v234stat"><small>PARCOURS</small><b>#${path}</b></div>
+     <div class="v234stat"><small>PIÈCES</small><b>🪙 ${coins()}</b></div>
+     <div class="v234stat"><small>ESSAIS</small><b>${tries}</b></div>
+     <div class="v234stat"><small>VICTOIRES</small><b>${wins}</b></div>
+     <div class="v234stat"><small>MEILLEUR ÉCART</small><b>${best()!==null?best().toFixed(3)+'s':'—'}</b></div>
+     <div class="v234stat"><small>MEILLEURE SÉRIE</small><b>x${streak}</b></div>
+    </div>`);
+ };
+ const boosts=()=>{
+   const defs=[['shield','🛡️','Bouclier Boss','Protège une défaite de Boss',75],
+               ['focus','👁️','Focus','Annule le prochain modificateur',50],
+               ['freeze','❄️','Gel','Affiche normalement le chrono',40]];
+   const rows=defs.map(([k,i,t,d,p])=>`<div class="v234item"><div class="v234ico">${i}</div><div class="v234grow"><b>${t}</b><small>${d}<br>Possédé : <span id="cnt-${k}">${n('psBoost_'+k,0)}</span></small></div><button class="v234buy" data-buy="${k}" data-price="${p}">${p} 🪙</button></div>`).join('');
+   const m=modal('v234Boosts','🛍️ Boosts',`<div class="v234muted">Solde : <b id="v234Bal">${coins()} 🪙</b></div>${rows}`);
+   m.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{
+     const p=+b.dataset.price,k=b.dataset.buy;if(coins()<p)return;
+     setCoins(coins()-p);LS.setItem('psBoost_'+k,n('psBoost_'+k,0)+1);
+     m.querySelector('#cnt-'+k).textContent=n('psBoost_'+k,0);m.querySelector('#v234Bal').textContent=coins()+' 🪙';
+   });
+ };
+ const rewards=()=>{
+   const data=[
+    ['🎯','Première réussite',n('psTotalWins',n('psWins',0))>0],
+    ['🔥','Série x5',n('psBestStreak',0)>=5],
+    ['⚡','Sous 0.050 s',best()!==null&&best()<.05],
+    ['👑','Parcours 5',n('psPath',n('psCurrentPath',1))>=5]
+   ];
+   modal('v234Rewards','🏆 Récompenses',data.map(([i,t,ok])=>`<div class="v234item"><div class="v234ico">${i}</div><div class="v234grow"><b>${t}</b><small>${ok?'Débloqué':'À débloquer'}</small></div><span class="v234badge">${ok?'OBTENU':'🔒'}</span></div>`).join(''));
+ };
+
+ // Repair buttons by label even if older handlers are broken.
+ const wire=()=>{
+   $$('button,.v22navbtn,.v22quick').forEach(el=>{
+     const t=(el.textContent||'').toLowerCase();
+     if(t.includes('profil')) el.onclick=e=>{e.preventDefault();profile()};
+     if(t.includes('boost')) el.onclick=e=>{e.preventDefault();boosts()};
+     if(t.includes('récomp')||t.includes('recomp')) el.onclick=e=>{e.preventDefault();rewards()};
+   });
+ };
+ wire(); setTimeout(wire,500); setTimeout(wire,1500);
+ const ver=$('.v181ver');if(ver)ver.textContent='VERSION 23.4 • PROFIL & RÉCOMPENSES';
+})();
+</script>
+
 </body></html>
