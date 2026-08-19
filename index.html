@@ -1386,4 +1386,76 @@ body.v235-challenge-open #v235ChallengeClose{display:flex}
 })();
 </script>
 
+
+<style id="v236-overlay-exit-fix">
+#v236OverlayClose{
+ position:fixed;top:calc(env(safe-area-inset-top) + 14px);right:16px;z-index:250000;
+ width:44px;height:44px;border:1px solid #ffffff18;border-radius:50%;
+ background:#0d1328ee;color:#fff;font-size:24px;display:none;align-items:center;justify-content:center;
+ box-shadow:0 8px 24px #0008
+}
+body.v236-overlay-open #v236OverlayClose{display:flex}
+</style>
+<button id="v236OverlayClose" aria-label="Fermer">×</button>
+<script id="v236-overlay-fix">
+(()=>{
+ const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ const btn=document.getElementById('v236OverlayClose');
+
+ function isMissionText(t){
+   t=t.toLowerCase();
+   return (t.includes('missions') && (t.includes('jouer 10 parties')||t.includes('faire une série')||t.includes('réussir 10 fois')))
+       || (t.includes('défis') && t.includes('connexion 7 jours'))
+       || (t.includes('jouer 5 parties') && t.includes('réussir 3 fois'));
+ }
+ function overlayCandidates(){
+   return qa('div,section,aside').filter(e=>{
+     const txt=(e.innerText||'').trim();
+     if(!txt || !isMissionText(txt)) return false;
+     const cs=getComputedStyle(e);
+     return cs.position==='fixed' || e.classList.contains('on') || e.classList.contains('show');
+   });
+ }
+ function detect(){
+   const open=overlayCandidates().length>0;
+   document.body.classList.toggle('v236-overlay-open',open);
+ }
+ function closeAll(){
+   overlayCandidates().forEach(e=>{
+     e.classList.remove('on','show','open');
+     e.style.display='none';
+   });
+   ['v181Sheet','v22Panel'].forEach(id=>{
+     const e=document.getElementById(id);
+     if(e){e.classList.remove('on','show','open');e.style.display='';}
+   });
+   document.body.classList.remove('v236-overlay-open');
+   const home=document.getElementById('v181Home');
+   if(home){home.classList.remove('hide');home.style.display='';}
+   document.body.classList.remove('v22-game');
+   qa('[data-v22]').forEach(b=>b.classList.toggle('on',b.dataset.v22==='home'));
+ }
+ btn.onclick=closeAll;
+
+ // Bottom navigation always escapes Missions/Challenges.
+ qa('[data-v22]').forEach(b=>{
+   b.addEventListener('click',()=>{
+     if(document.body.classList.contains('v236-overlay-open')){
+       overlayCandidates().forEach(e=>{
+         e.classList.remove('on','show','open');
+         e.style.display='none';
+       });
+       document.body.classList.remove('v236-overlay-open');
+     }
+   },true);
+ });
+
+ const obs=new MutationObserver(detect);
+ obs.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class','style']});
+ setInterval(detect,700);
+
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 23.6 • MENUS CORRIGÉS';
+})();
+</script>
+
 </body></html>
