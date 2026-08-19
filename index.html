@@ -211,7 +211,7 @@ $('today').onclick=()=>{daily=true;$('today').classList.add('on');$('world').cla
 async function send(d,l){if(!pid||!secret||d>.20)return;await rpc('perfect_stop_submit_score',{p_player_id:pid,p_secret:secret,p_level:l,p_error_ms:Math.round(d*1000)});if(l===level)board()}
 
 function save(){
- localStorage.psWorldLevel=level;
+ localStorage.psWorldLevel=Math.max(+(localStorage.psWorldLevel||1),level);
  localStorage.psLevel=mode();
  localStorage.psV181Cycle=Math.floor((level-1)/5)+1;
  localStorage.psV23MaxWorld=Math.max(+(localStorage.psV23MaxWorld||1),level);
@@ -2061,6 +2061,69 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
 <script id="v249-version-fix">
 (()=>{setTimeout(()=>{const v=document.querySelector('.v181ver');if(v)v.textContent='VERSION 25.1 • NIVEAU 5 CORRIGÉ'},300);})();
 </script>
+
+<style id="v252-replay-style">
+#v252Replay{position:fixed;inset:0;z-index:99990;background:linear-gradient(180deg,#020934,#010616 65%,#01040d);display:none;overflow:auto;padding:22px 18px 110px;color:#fff}
+#v252Replay.on{display:block}.v252head{display:flex;align-items:center;justify-content:space-between;max-width:680px;margin:auto}.v252head h2{font-size:28px;margin:4px 0 6px}.v252x{border:0;background:#111a42;color:#fff;border-radius:50%;width:48px;height:48px;font-size:25px}
+.v252sub{max-width:680px;margin:0 auto 18px;color:#8d93ad}.v252grid{max-width:680px;margin:auto;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.v252lvl{border:1px solid rgba(255,255,255,.10);border-radius:18px;background:#111a38;color:#fff;padding:16px;text-align:left;min-height:92px;font-weight:900;font-size:17px}
+.v252lvl b{display:block;color:#c99a24;font-size:13px;margin-top:8px}.v252lvl.active{outline:2px solid #a56500}.v252lvl.lock{opacity:.35}
+#v252ReplayBtn{width:100%;margin-top:10px;border:0;border-radius:14px;background:#222d52;color:white;font-weight:900;padding:13px;font-size:15px}
+</style>
+<div id="v252Replay">
+ <div class="v252head"><h2>🗺️ Rejouer un niveau</h2><button class="v252x" id="v252ReplayClose">×</button></div>
+ <p class="v252sub">Améliore ton meilleur écart et tente de prendre la 1re place du classement du niveau.</p>
+ <div class="v252grid" id="v252ReplayGrid"></div>
+</div>
+<script id="v252-replay-script">
+(()=>{
+ const q=id=>document.getElementById(id);
+ function maxUnlocked(){return Math.max(1, +(localStorage.psWorldLevel||localStorage.psLevel||1));}
+ function bestText(n){
+   try{
+     if(typeof bests!=='undefined' && bests[n]!=null)return '🎯 Record : '+Number(bests[n]).toFixed(3)+'s';
+   }catch(e){}
+   return '🎯 Aucun record';
+ }
+ function openReplay(){
+   const max=maxUnlocked(), grid=q('v252ReplayGrid'); if(!grid)return;
+   grid.innerHTML='';
+   for(let n=1;n<=max;n++){
+     const b=document.createElement('button'); b.className='v252lvl'+(n===level?' active':'');
+     b.innerHTML=(n%5===0?'👑 BOSS ':'🎯 NIVEAU ')+n+'<b>'+bestText(n)+'</b>';
+     b.onclick=()=>selectReplay(n); grid.appendChild(b);
+   }
+   q('v252Replay').classList.add('on');
+ }
+ function selectReplay(n){
+   const unlocked=maxUnlocked(); if(n>unlocked)return;
+   level=n; target=targetForLevel(); tries=0; running=false; cancelAnimationFrame(raf);
+   $('goal').textContent=(mode()===4?'?':target.toFixed(2));
+   $('timer').classList.remove('hide'); $('timer').textContent='0.000';
+   $('result').textContent='Niveau '+n+' sélectionné • améliore ton record !';
+   $('btn').textContent='START';
+   q('v252Replay').classList.remove('on');
+   draw(); board();
+   try{openPlay()}catch(e){}
+ }
+ q('v252ReplayClose').onclick=()=>q('v252Replay').classList.remove('on');
+
+ // Add a visible button to the existing home levels sheet/button area.
+ document.addEventListener('click',e=>{
+   const t=e.target.closest && e.target.closest('[data-v181="levels"]');
+   if(t){e.preventDefault();e.stopImmediatePropagation();openReplay()}
+ },true);
+
+ // Also add replay selector directly on play screen near main button.
+ const mainBtn=$('btn');
+ if(mainBtn && !q('v252ReplayBtn')){
+   const r=document.createElement('button');r.id='v252ReplayBtn';r.textContent='🗺️ REJOUER UN NIVEAU DÉBLOQUÉ';
+   r.onclick=openReplay;mainBtn.insertAdjacentElement('afterend',r);
+ }
+ window.openReplayLevels=openReplay;
+})();
+</script>
+
 </body></html>
 <style id="v238-continuous-style">
 #v19BossHud{display:none!important}
