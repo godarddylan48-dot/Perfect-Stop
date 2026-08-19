@@ -703,4 +703,29 @@ body.v22-game main.w{padding-bottom:84px}
 })();
 </script>
 
+
+<script id="v221-presence-fix">
+(()=>{
+ const LS=localStorage;
+ const pid=LS.psPid||'';
+ // Prefer the reserved player id so several tabs/browser sessions for the same player count once.
+ const stableId = pid && pid.length>=8 ? 'player:'+pid : (LS.psPresenceDevice||(LS.psPresenceDevice='device:'+((crypto.randomUUID&&crypto.randomUUID())||Math.random().toString(36).slice(2)+Date.now())));
+ const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
+ const HD={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'};
+ async function beat(){
+  try{
+   const r=await fetch(U+'/rest/v1/rpc/perfect_stop_presence_heartbeat',{method:'POST',headers:HD,body:JSON.stringify({p_session_id:stableId})});
+   if(!r.ok)return;
+   const c=await r.json();
+   const el=document.getElementById('v21ActiveText');
+   if(el)el.textContent=`${c} joueur${c>1?'s':''} actif${c>1?'s':''}`;
+  }catch(e){}
+ }
+ beat();
+ setInterval(beat,20000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)beat()});
+ const ver=document.querySelector('.v181ver');if(ver)ver.textContent='VERSION 22.1 • JOUEURS LIVE CORRIGÉS';
+})();
+</script>
+
 </body></html>
