@@ -1631,9 +1631,13 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
   const rows=await get(`perfect_stop_duels?select=*&or=(challenger_id.eq.${me},opponent_id.eq.${me})&status=eq.finished&order=updated_at.desc&limit=30`);
   let wins=0,losses=0,draws=0;rows.forEach(d=>{let r=resultOf(d);if(r==='win')wins++;else if(r==='loss')losses++;else draws++});
   const total=wins+losses+draws,rate=total?Math.round(wins/total*100):0;
+  let currentStreak=0,bestDuelStreak=0,run=0;
+  for(const d of [...rows].reverse()){const r=resultOf(d);if(r==='win'){run++;bestDuelStreak=Math.max(bestDuelStreak,run)}else run=0}
+  for(const d of rows){if(resultOf(d)==='win')currentStreak++;else break}
   c.innerHTML=`<div class=v23box><b>⚔️ TON PROFIL DUEL</b><small style="display:block;color:#ffffff66;margin-top:4px">Même cible pour les deux joueurs. Le plus petit écart gagne.</small>
-  <div class=v24stats><div class=v24stat><b>${wins}</b><small>VICTOIRES</small></div><div class=v24stat><b>${losses}</b><small>DÉFAITES</small></div><div class=v24stat><b>${rate}%</b><small>TAUX DE VICTOIRE</small></div></div></div>
-  <div class=v23box><b>🕘 DERNIERS DUELS</b><div class=v24history>${rows.length?rows.slice(0,10).map(d=>{let r=resultOf(d),cl=r==='win'?'v24win':r==='loss'?'v24loss':'v24draw',lab=r==='win'?'🏆 GAGNÉ':r==='loss'?'❌ PERDU':'🤝 ÉGALITÉ';return `<div class=v24match><div><b>${esc(opponentName(d))}</b><small>${((myErr(d)||0)/1000).toFixed(3)}s vs ${((oppErr(d)||0)/1000).toFixed(3)}s</small></div><b class=${cl}>${lab}</b></div>`}).join(''):'<div class=v24empty>Aucun duel terminé pour le moment.</div>'}</div></div>`;
+  <div class=v24stats><div class=v24stat><b>${wins}</b><small>VICTOIRES</small></div><div class=v24stat><b>${losses}</b><small>DÉFAITES</small></div><div class=v24stat><b>${rate}%</b><small>TAUX DE VICTOIRE</small></div></div>
+  <div class=v241streak><span>🔥 Série actuelle <b>x${currentStreak}</b></span><span>🏆 Record <b>x${bestDuelStreak}</b></span></div></div>
+  <div class=v23box><b>🕘 DERNIERS DUELS</b><div class=v24history>${rows.length?rows.slice(0,10).map(d=>{let r=resultOf(d),cl=r==='win'?'v24win':r==='loss'?'v24loss':'v24draw',lab=r==='win'?'🏆 GAGNÉ':r==='loss'?'❌ PERDU':'🤝 ÉGALITÉ';let oid=d.challenger_id===pid()?d.opponent_id:d.challenger_id,on=opponentName(d);return `<div class=v24match><div><b>${esc(on)}</b><small>${((myErr(d)||0)/1000).toFixed(3)}s vs ${((oppErr(d)||0)/1000).toFixed(3)}s</small></div><div class=v241actions><b class=${cl}>${lab}</b><button class=v241revenge data-duel="${esc(oid)}" data-name="${esc(on)}">↻ REVANCHE</button></div></div>`}).join(''):'<div class=v24empty>Aucun duel terminé pour le moment.</div>'}</div></div>`;
  }
  const tabs=document.querySelector('.v23tabs');
  if(tabs&&!document.querySelector('[data-v23tab="myduels"]')){
@@ -1694,5 +1698,54 @@ font-size:11px;font-weight:900;letter-spacing:.5px;background:rgba(255,255,255,.
    if(b)b.textContent='⚡ '+name;
  }
  setInterval(refresh,700);setTimeout(refresh,200);
+})();
+</script>
+
+
+<style id="v241-style">
+.v241streak{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.v241streak span{background:#ffffff08;border:1px solid #ffffff0d;border-radius:12px;padding:10px 6px;font-size:11px;text-align:center}
+.v241streak b{display:block;color:#ffd45b;font-size:19px;margin-top:3px}
+.v241actions{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.v241revenge{border:0;border-radius:9px;padding:7px 9px;background:#693900;color:#fff;font-size:9px;font-weight:900}
+.v241king{background:linear-gradient(135deg,#2b1906,#101329)!important;border-color:#ffd45b33!important;text-align:center}
+.v241crown{font-size:42px;line-height:1;margin-bottom:8px}
+.v241kingname{font-size:24px;font-weight:1000;color:#ffd45b}
+.v241kinghome{margin:9px 0;background:#ffffff08;border:1px solid #ffd45b24;border-radius:15px;padding:10px 12px;text-align:left;font-size:11px}
+.v241kinghome b{color:#ffd45b}
+</style>
+<script id="v241-features">
+(()=>{
+ const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
+ const HD={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'};
+ const $=id=>document.getElementById(id),q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ const esc=s=>String(s||'').replace(/[&<>"']/g,'');
+ async function get(path){try{const r=await fetch(U+'/rest/v1/'+path,{headers:HD});if(!r.ok)return[];return await r.json()}catch(e){return[]}}
+ const day=()=>new Date().toISOString().slice(0,10);
+ async function kingData(){return await get('perfect_stop_tournament_daily?select=player_name,error_ms,world_level&day=eq.'+day()+'&order=error_ms.asc&limit=10')}
+ async function renderKing(){
+   const c=$('v23ArenaContent');if(!c)return;
+   c.innerHTML='<div class=v23box>Recherche du Roi du jour…</div>';
+   const a=await kingData(),k=a[0];
+   if(!k){c.innerHTML='<div class="v23box v241king"><div class=v241crown>👑</div><b>ROI DU JOUR</b><p>Aucun score aujourd’hui. Le trône est libre !</p></div>';return}
+   c.innerHTML=`<div class="v23box v241king"><div class=v241crown>👑</div><div>ROI DU JOUR</div><div class=v241kingname>${esc(k.player_name)}</div><p>Meilleur écart : <b>${(k.error_ms/1000).toFixed(3)}s</b> • Parcours ${k.world_level||1}</p></div>
+   <div class=v23box><b>🏁 TOP DU JOUR</b>${a.map((x,i)=>`<div class=v23row><div><b>${i<3?['👑','🥈','🥉'][i]:i+1+'.'} ${esc(x.player_name)}</b><small>Parcours ${x.world_level||1}</small></div><span class=v23score>${(x.error_ms/1000).toFixed(3)}s</span></div>`).join('')}</div>`;
+ }
+ const tabs=q('.v23tabs');
+ if(tabs&&!q('[data-v23tab="king"]')){
+   const b=document.createElement('button');b.className='v23tab';b.dataset.v23tab='king';b.textContent='👑 Roi du jour';
+   const tour=q('[data-v23tab="tour"]');tabs.insertBefore(b,tour||null);
+   b.onclick=()=>{qa('[data-v23tab]').forEach(x=>x.classList.toggle('on',x===b));renderKing()}
+ }
+ async function homeKing(){
+   const card=q('.v181card');if(!card||q('#v241KingHome'))return;
+   const a=await kingData(),k=a[0],box=document.createElement('div');
+   box.id='v241KingHome';box.className='v241kinghome';
+   box.innerHTML=k?`👑 <b>ROI DU JOUR : ${esc(k.player_name)}</b><br><span>${(k.error_ms/1000).toFixed(3)}s • bats son score dans Compétition</span>`:'👑 <b>ROI DU JOUR</b><br><span>Le trône est libre : sois le premier !</span>';
+   q('.v181play')?.insertAdjacentElement('beforebegin',box);
+ }
+ setTimeout(homeKing,500);
+ function version(){const v=q('.v181ver');if(v)v.textContent='VERSION 24.1 • ROI DU JOUR & DUELS+'}
+ setTimeout(version,100);setTimeout(version,1400);
 })();
 </script>
