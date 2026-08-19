@@ -1999,6 +1999,61 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  const ver=q('.v181ver');if(ver)ver.textContent='VERSION 24.7 • CHAT EN DIRECT';
 })();
 </script>
+
+<style id="v248-presence-style">
+#v248Presence{display:inline-flex;align-items:center;gap:6px;margin-top:5px;padding:5px 9px;border-radius:999px;background:#ffffff08;border:1px solid #ffffff0d;font-size:11px;font-weight:800;color:#d8ffe2}
+#v248Dot{width:8px;height:8px;border-radius:50%;background:#35df73;box-shadow:0 0 9px #35df7377}
+</style>
+<script id="v248-presence">
+(()=>{
+ const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
+ const HD={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'};
+ const q=s=>document.querySelector(s),$=id=>document.getElementById(id);
+ const pid=()=>localStorage.psPid||'',pname=()=>localStorage.psName||'Joueur';
+ let hbTimer=null,countTimer=null;
+
+ // Insert the indicator directly below the Chat subtitle.
+ const head=q('#v247ChatPanel .v247head > div');
+ if(head&&!$('v248Presence')){
+   const p=document.createElement('div');p.id='v248Presence';p.innerHTML='<span id="v248Dot"></span><span id="v248Count">Connexion…</span>';head.appendChild(p)
+ }
+
+ async function heartbeat(){
+   if(!pid()||document.visibilityState!=='visible')return;
+   try{
+     await fetch(U+'/rest/v1/perfect_stop_presence?on_conflict=player_id',{
+       method:'POST',
+       headers:{...HD,'Prefer':'resolution=merge-duplicates,return=minimal'},
+       body:JSON.stringify({player_id:pid(),player_name:pname(),last_seen:new Date().toISOString()})
+     });
+   }catch(e){}
+ }
+
+ async function refreshCount(){
+   const out=$('v248Count');if(!out)return;
+   try{
+     const since=new Date(Date.now()-45000).toISOString();
+     const r=await fetch(U+'/rest/v1/perfect_stop_presence?select=player_id&last_seen=gte.'+encodeURIComponent(since),{headers:HD});
+     if(!r.ok)throw 0;
+     const rows=await r.json();
+     // player_id is the PRIMARY KEY, so one player can never be counted twice.
+     const n=rows.length;
+     out.textContent=n+' joueur'+(n>1?'s':'')+' en ligne';
+   }catch(e){out.textContent='Statut indisponible'}
+ }
+
+ function startPresence(){
+   clearInterval(hbTimer);clearInterval(countTimer);
+   heartbeat().then(refreshCount);
+   hbTimer=setInterval(heartbeat,15000);
+   countTimer=setInterval(refreshCount,10000);
+ }
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')startPresence()});
+ startPresence();
+
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 24.8 • CHAT & PRÉSENCE';
+})();
+</script>
 </body></html>
 <style id="v238-continuous-style">
 #v19BossHud{display:none!important}
