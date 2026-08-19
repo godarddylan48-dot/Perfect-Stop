@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#081126">
-<title>Perfect Stop V23.8</title>
+<title>Perfect Stop V23.9</title>
 <style>
 *{box-sizing:border-box;touch-action:manipulation}
 html,body{margin:0;height:100%;overflow:hidden}
@@ -84,7 +84,34 @@ const HA=[99,99,5,2,2,0],BASE=[0,10,9,8,0,7];
 let level=+(localStorage.psWorldLevel||localStorage.psLevel||1);if(level<1)level=1;
 function mode(){return ((level-1)%5)+1}
 function bossLevel(){return level%5===0}
-function levelTolerance(){return bossLevel()?.120:Math.max(.100,.200-Math.floor((level-1)/10)*.005)}
+function difficultyTier(){return Math.floor((level-1)/5)}
+function levelTolerance(){
+ const tier=difficultyTier();
+ // Normal: 0.200s -> 0.185 -> 0.170 ... floor 0.055s
+ // Boss:   0.120s -> 0.110 -> 0.100 ... floor 0.040s
+ return bossLevel()?Math.max(.040,.120-tier*.010):Math.max(.055,.200-tier*.015)
+}
+function hideAfter(){
+ const tier=difficultyTier(),m=mode();
+ // Timer progressively disappears earlier. Blind/boss stay fully hidden.
+ if(m>=4)return 0;
+ return Math.max(.22,(HA[m]||1)-tier*.16)
+}
+function targetForLevel(){
+ const m=mode(),tier=difficultyTier();
+ if(m===4){
+   // Random target range grows with difficulty.
+   const lo=Math.max(2.50,7.00-tier*.35), hi=Math.min(14.50,10.00+tier*.45);
+   return (Math.floor(Math.random()*Math.max(1,Math.round((hi-lo)*100)+1))+Math.round(lo*100))/100
+ }
+ let base=BASE[m]||10;
+ // After level 5, target time itself varies slightly so players cannot memorize rhythm.
+ if(tier>0 && m<4){
+   const spread=Math.min(2.4,.35*tier);
+   base += (Math.random()*2-1)*spread
+ }
+ return Math.max(2.5,base)
+}
 let tries=0,totalRunTries=0,pts=+(localStorage.psPoints||0),xp=+(localStorage.psXP||0),running=false,start=0,raf,target=BASE[mode()]||10,runBest=999,daily=false,lastElapsed=0;
 let bests=JSON.parse(localStorage.psLevelBests||'[null,null,null,null,null,null]');
 let streak=+(localStorage.psStreak||0),bestStreak=+(localStorage.psBestStreak||0),runBestStreak=0;
@@ -166,10 +193,11 @@ function draw(){
    d.className='dot '+(i<m?'done ':'')+(i===m?'current':'');
    t.appendChild(d)
  }
- $('lvl').textContent=(bossLevel()?'👑 BOSS ':'NIVEAU ')+level+' • '+(bossLevel()?'BOSS PRÉCISION':N[m]);
+ let tier=difficultyTier(),diff=tier===0?'FACILE':tier===1?'NORMAL':tier===2?'DIFFICILE':tier===3?'EXPERT':tier===4?'EXTRÊME':'LÉGENDAIRE';
+ $('lvl').textContent=(bossLevel()?'👑 BOSS ':'NIVEAU ')+level+' • '+(bossLevel()?'BOSS '+diff:diff+' • '+N[m]);
  $('points').textContent=pts;$('tries').textContent=tries;$('streak').textContent='🔥 '+streak;
  $('runBest').textContent=runBest<999?runBest.toFixed(3)+'s':'—';
- if(m!==4)$('goal').textContent=BASE[m].toFixed(2);
+ if(m!==4 && !running)$('goal').textContent=(BASE[m]||10).toFixed(2);
  let r=rankInfo();$('rankChip').textContent=r[0]+' • '+xp+' XP';
  let pct=Math.min(100,((xp-r[1])/(r[2]-r[1]))*100);$('xpfill').style.width=pct+'%';
  $('xpText').textContent=(xp-r[1])+' / '+(r[2]-r[1])+' XP';
@@ -177,11 +205,16 @@ function draw(){
  $('soundBtn').textContent=soundOn?'🔊':'🔇';
  $('progressText').textContent=bossLevel()
    ?'👑 Boss niveau '+level+' • réussis une fois à ≤ '+levelTolerance().toFixed(3)+'s pour passer au niveau '+(level+1)
-   :'Prochain Boss : niveau '+(Math.ceil(level/5)*5)+' • '+H[m];
+   :'Difficulté '+diff+' • précision ≤ '+levelTolerance().toFixed(3)+'s • Boss '+(Math.ceil(level/5)*5);
  drawDaily();updateTrophies();board()
 }
 
-function loop(now){if(!running)return;lastElapsed=(now-start)/1000;let m=mode();if(m<5)$('timer').textContent=lastElapsed.toFixed(3);if(lastElapsed>=HA[m])$('timer').classList.add('hide');if(lastElapsed>=target+3)finishAttempt(lastElapsed);else raf=requestAnimationFrame(loop)}
+function loop(now){
+ if(!running)return;lastElapsed=(now-start)/1000;let m=mode(),h=hideAfter();
+ if(m<4)$('timer').textContent=lastElapsed.toFixed(3);
+ if(m>=4 || lastElapsed>=h)$('timer').classList.add('hide');
+ if(lastElapsed>=target+3)finishAttempt(lastElapsed);else raf=requestAnimationFrame(loop)
+}
 
 function finishAttempt(elapsed){
  if(!running)return;running=false;cancelAnimationFrame(raf);
@@ -215,7 +248,7 @@ function finishAttempt(elapsed){
    }
    level++;
    save();
-   setTimeout(()=>{target=BASE[mode()]||10;$('goal').textContent=(mode()===4?'?':target.toFixed(2));draw()},650)
+   setTimeout(()=>{target=targetForLevel();$('goal').textContent=(mode()===4?'?':target.toFixed(2));draw()},650)
  }else{
    haptic([35,40,35]);beep(180,.12,'sawtooth');$('app').classList.add('shake');setTimeout(()=>$('app').classList.remove('shake'),320);
    streak=0;$('result').innerHTML='❌ '+d.toFixed(3)+'s • objectif ≤ '+tol.toFixed(3)+'s<span class="direction">Temps : '+x.toFixed(3)+' s • '+(late?'⏰ Trop tard — appuie plus tôt':'⚡ Trop tôt — attends davantage')+'</span>'
@@ -233,9 +266,9 @@ $('again').onclick=()=>{tries=0;totalRunTries=0;runBest=999;runBestStreak=0;stre
 $('btn').onclick=()=>{
  if(running){finishAttempt((performance.now()-start)/1000);return}
  let m=mode();
- target=m===4?(Math.floor(Math.random()*301)+700)/100:BASE[m];
+ target=targetForLevel();
  $('goal').textContent=target.toFixed(2);running=true;start=performance.now();lastElapsed=0;
- $('timer').textContent=m===5?'••••':'0.000';$('timer').classList.toggle('hide',m===5);
+ $('timer').textContent=m>=4?'••••':'0.000';$('timer').classList.toggle('hide',m>=4);
  $('result').textContent='STOP au bon moment !';$('btn').textContent='STOP';raf=requestAnimationFrame(loop)
 };
 
@@ -1577,7 +1610,7 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  const LS=localStorage;
  const world=()=>Math.max(1,+(LS.psWorldLevel||1));
  const ver=document.querySelector('.v181ver');
- if(ver)ver.textContent='VERSION 23.8 • PROGRESSION CONTINUE';
+ if(ver)ver.textContent='VERSION 23.9 • DIFFICULTÉ PROGRESSIVE';
  function refreshContinuousLabels(){
    const w=world(), next=Math.ceil(w/5)*5;
    document.querySelectorAll('#v181Path,.v181roadtop span:first-child').forEach(e=>{
@@ -1589,5 +1622,25 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  }
  refreshContinuousLabels();
  setInterval(refreshContinuousLabels,1200);
+})();
+</script>
+
+<style id="v239-difficulty-style">
+#v239Difficulty{display:inline-flex;align-items:center;justify-content:center;padding:5px 9px;border-radius:999px;
+font-size:11px;font-weight:900;letter-spacing:.5px;background:rgba(255,255,255,.07);margin-left:5px}
+</style>
+<script id="v239-difficulty-ui">
+(()=>{
+ function refresh(){
+   if(typeof level==='undefined')return;
+   const tier=Math.floor((level-1)/5);
+   const names=['FACILE','NORMAL','DIFFICILE','EXPERT','EXTRÊME'];
+   const name=names[tier]||'LÉGENDAIRE';
+   let b=document.getElementById('v239Difficulty');
+   const anchor=document.getElementById('rankChip');
+   if(!b&&anchor){b=document.createElement('span');b.id='v239Difficulty';anchor.insertAdjacentElement('afterend',b)}
+   if(b)b.textContent='⚡ '+name;
+ }
+ setInterval(refresh,700);setTimeout(refresh,200);
 })();
 </script>
