@@ -201,4 +201,61 @@ $('btn').onclick=()=>{
 };
 
 draw();ensurePlayer();
-</script></body></html>
+</script>
+<style id="v14-style">
+/* PERFECT STOP V14 — competitive polish */
+.v14-badge{position:fixed;right:12px;bottom:12px;z-index:50;font:700 11px system-ui;color:#fff8;
+background:#10152a99;border:1px solid #ffffff12;border-radius:999px;padding:6px 9px;backdrop-filter:blur(8px)}
+.v14-toast{position:fixed;left:50%;top:18%;transform:translate(-50%,-18px);z-index:9999;
+background:#11162d;color:white;border:1px solid #ffffff20;border-radius:18px;padding:12px 18px;
+font:800 14px system-ui;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 18px 50px #0009}
+.v14-toast.show{opacity:1;transform:translate(-50%,0)}
+.v14-pulse{animation:v14pulse .42s ease}
+@keyframes v14pulse{50%{transform:scale(1.035);filter:brightness(1.18)}}
+.v14-confetti{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden}
+.v14-piece{position:absolute;top:-20px;width:7px;height:13px;background:currentColor;border-radius:2px;
+animation:v14fall 1.25s linear forwards}
+@keyframes v14fall{to{transform:translate3d(var(--dx),105vh,0) rotate(720deg);opacity:.1}}
+</style>
+<div class="v14-toast" id="v14Toast"></div><div class="v14-confetti" id="v14Confetti"></div>
+<div class="v14-badge">V14</div>
+<script id="v14-features">
+(()=>{
+ const K='perfectStopV14';
+ let s={combo:0,maxCombo:0,coins:0,lastDay:'',dailyPlays:0,missions:{play10:0,streak3:0}};
+ try{s={...s,...JSON.parse(localStorage.getItem(K)||'{}')}}catch(e){}
+ const save=()=>localStorage.setItem(K,JSON.stringify(s));
+ const toast=(t)=>{let e=document.getElementById('v14Toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1600)};
+ const confetti=()=>{let c=document.getElementById('v14Confetti');c.innerHTML='';for(let i=0;i<30;i++){let p=document.createElement('i');p.className='v14-piece';p.style.left=Math.random()*100+'vw';p.style.color=['#ffb000','#fff','#ff5b70','#6ee7ff'][i%4];p.style.setProperty('--dx',(Math.random()*180-90)+'px');p.style.animationDelay=(Math.random()*.25)+'s';c.appendChild(p)}setTimeout(()=>c.innerHTML='',1700)};
+ const today=()=>new Date().toISOString().slice(0,10);
+ if(s.lastDay!==today()){s.lastDay=today();s.dailyPlays=0;save();toast('🎁 Nouveau défi quotidien disponible');}
+ // Observe result text changes to reward close stops without depending on old internal function names.
+ const obs=new MutationObserver(()=>{
+   const body=document.body.innerText;
+   const m=[...body.matchAll(/([0-9]+\.[0-9]{3})s/g)].map(x=>+x[1]);
+   if(!m.length)return;
+   const d=Math.min(...m);
+   const sig=body.slice(0,400)+'|'+d;
+   if(window.__v14sig===sig)return; window.__v14sig=sig;
+   s.dailyPlays++; s.missions.play10=Math.min(10,(s.missions.play10||0)+1);
+   if(d<=.20){s.combo++;s.maxCombo=Math.max(s.maxCombo,s.combo);let gain=d<=.05?20:d<=.10?12:6;s.coins+=gain;
+      if(s.combo>=3)s.missions.streak3=1;
+      toast((d<=.05?'💎 PERFECT ! ':'🔥 Réussi ! ')+`+${gain} pièces • série x${s.combo}`); confetti();
+   } else { if(s.combo>=2) toast(`Série x${s.combo} terminée`); s.combo=0; }
+   save();
+ },{subtree:true,childList:true,characterData:true});
+ obs.observe(document.body,{subtree:true,childList:true,characterData:true});
+ // Long-press title / keyboard shortcut opens compact V14 stats without changing game layout.
+ const panel=()=>{
+   alert(`PERFECT STOP V14\n\n🔥 Série actuelle : ${s.combo}\n🏆 Meilleure série : ${s.maxCombo}\n🪙 Pièces : ${s.coins}\n🎯 Parties du jour : ${s.dailyPlays}\n\nMISSIONS\n• Jouer 10 fois : ${s.missions.play10}/10\n• Série x3 : ${s.missions.streak3?'Terminée':'À faire'}\n\nLes données sont sauvegardées sur cet appareil.`);
+ };
+ document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='v')panel()});
+ let title=[...document.querySelectorAll('*')].find(e=>e.children.length===0&&/PERFECT STOP/i.test(e.textContent||''));
+ if(title){let timer;title.addEventListener('touchstart',()=>timer=setTimeout(panel,700),{passive:true});title.addEventListener('touchend',()=>clearTimeout(timer),{passive:true});}
+ // Make primary action feel more responsive.
+ document.addEventListener('click',e=>{const t=e.target;if(t&&/START|STOP|REJOUER|JOUER/i.test(t.textContent||'')){t.classList.remove('v14-pulse');void t.offsetWidth;t.classList.add('v14-pulse')}},true);
+ window.PerfectStopV14={stats:()=>({...s}),panel};
+})();
+</script>
+
+</body></html>
