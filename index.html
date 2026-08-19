@@ -1822,7 +1822,106 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
    }`;
  document.head.appendChild(st);
  const ver=q('.v181ver');
- if(ver)ver.textContent='VERSION 24.4 • ACCUEIL ÉPURÉ';
+ if(ver)ver.textContent='VERSION 24.5 • ACCUEIL COMPACT';
+})();
+</script>
+
+
+<style id="v245-compact-home">
+/* PERFECT STOP V24.5 — accueil vraiment compact */
+#v181Home{
+  padding:10px 16px 8px!important;
+  align-items:flex-start!important;
+  overflow:auto!important;
+}
+.v181card{
+  width:min(94vw,430px)!important;
+  padding-top:0!important;
+}
+.v181logo{
+  font-size:30px!important;
+  line-height:.98!important;
+}
+.v181ver{
+  margin:5px 0 3px!important;
+  font-size:8px!important;
+  letter-spacing:1.4px!important;
+}
+.v181sub{
+  margin-bottom:7px!important;
+  font-size:13px!important;
+}
+.v181rank,.v181road{
+  padding:9px 11px!important;
+  margin:5px 0!important;
+  border-radius:13px!important;
+}
+#v19Daily{
+  margin:5px 0!important;
+  padding:8px 10px!important;
+  border-radius:13px!important;
+}
+.v241kinghome{
+  margin:5px 0!important;
+  padding:7px 10px!important;
+  font-size:10px!important;
+  border-radius:13px!important;
+}
+.v181play{
+  padding:14px!important;
+  margin:6px 0!important;
+  font-size:21px!important;
+  border-radius:17px!important;
+}
+.v181grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,1fr)!important;
+  gap:6px!important;
+  margin-top:5px!important;
+}
+.v181btn{
+  min-width:0!important;
+  padding:10px 4px!important;
+  border-radius:12px!important;
+  font-size:10px!important;
+  line-height:1.1!important;
+}
+#v244SuddenBtn{
+  grid-column:auto!important;
+  width:auto!important;
+  margin:0!important;
+}
+@media(max-width:360px){
+  .v181btn{font-size:9px!important;padding:9px 2px!important}
+}
+@media(max-height:700px){
+  .v181logo{font-size:27px!important}
+  .v181sub{display:none!important}
+  .v181rank,.v181road{padding:7px 9px!important;margin:4px 0!important}
+  #v19Daily,.v241kinghome{padding:6px 8px!important;margin:4px 0!important}
+  .v181play{padding:12px!important;margin:5px 0!important}
+}
+</style>
+<script id="v245-layout">
+(()=>{
+  const q=s=>document.querySelector(s);
+  const qa=s=>[...document.querySelectorAll(s)];
+  const grid=q('.v181grid');
+  if(grid){
+    const sudden=q('#v244SuddenBtn');
+    const missions=q('[data-v181="missions"]');
+    const challenges=qa('.v181btn').find(b=>/DÉFIS/i.test(b.textContent||''));
+    if(sudden && missions){
+      grid.insertBefore(sudden, missions);
+    }
+    // Keep only the three main quick actions on the first row:
+    // Mort Subite, Missions, Défis. Other buttons stay after them.
+    if(challenges && sudden && missions){
+      grid.insertBefore(challenges, missions.nextSibling);
+    }
+  }
+  const v=q('.v181ver');
+  if(v)v.textContent='VERSION 24.5 • ACCUEIL COMPACT';
 })();
 </script>
 
@@ -1914,7 +2013,7 @@ font-size:11px;font-weight:900;letter-spacing:.5px;background:rgba(255,255,255,.
    q('.v181play')?.insertAdjacentElement('beforebegin',box);
  }
  setTimeout(homeKing,500);
- function version(){const v=q('.v181ver');if(v)v.textContent='VERSION 24.4 • ACCUEIL ÉPURÉ'}
+ function version(){const v=q('.v181ver');if(v)v.textContent='VERSION 24.5 • ACCUEIL COMPACT'}
  setTimeout(version,100);setTimeout(version,1400);
 })();
 </script>
