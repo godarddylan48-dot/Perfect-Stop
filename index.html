@@ -202,542 +202,85 @@ $('btn').onclick=()=>{
 
 draw();ensurePlayer();
 </script>
-<style id="v14-style">
-/* PERFECT STOP V14 — competitive polish */
-.v14-badge{position:fixed;right:12px;bottom:12px;z-index:50;font:700 11px system-ui;color:#fff8;
-background:#10152a99;border:1px solid #ffffff12;border-radius:999px;padding:6px 9px;backdrop-filter:blur(8px)}
-.v14-toast{position:fixed;left:50%;top:18%;transform:translate(-50%,-18px);z-index:9999;
-background:#11162d;color:white;border:1px solid #ffffff20;border-radius:18px;padding:12px 18px;
-font:800 14px system-ui;opacity:0;pointer-events:none;transition:.25s;box-shadow:0 18px 50px #0009}
-.v14-toast.show{opacity:1;transform:translate(-50%,0)}
-.v14-pulse{animation:v14pulse .42s ease}
-@keyframes v14pulse{50%{transform:scale(1.035);filter:brightness(1.18)}}
-.v14-confetti{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden}
-.v14-piece{position:absolute;top:-20px;width:7px;height:13px;background:currentColor;border-radius:2px;
-animation:v14fall 1.25s linear forwards}
-@keyframes v14fall{to{transform:translate3d(var(--dx),105vh,0) rotate(720deg);opacity:.1}}
+<style id="v181-style">
+#v181Home{position:fixed;inset:0;z-index:9000;background:radial-gradient(circle at 50% 0,#15245c 0,#04081b 48%,#01030b 100%);display:flex;align-items:center;justify-content:center;padding:22px;color:#fff;font-family:system-ui}
+#v181Home.hide{display:none}.v181card{width:min(92vw,430px);text-align:center}.v181logo{font-size:34px;font-weight:1000;letter-spacing:4px;line-height:1.05}.v181ver{font-size:10px;letter-spacing:1.6px;color:#ffffff66;margin:10px 0}.v181sub{color:#ffffff99;margin-bottom:18px}
+.v181rank,.v181road{background:#ffffff08;border:1px solid #ffffff10;border-radius:18px;padding:14px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;text-align:left}
+.v181road{display:block}.v181roadtop{display:flex;justify-content:space-between}.v181bar{height:8px;background:#ffffff12;border-radius:99px;overflow:hidden;margin-top:9px}.v181bar i{display:block;height:100%;background:linear-gradient(90deg,#d8780b,#ffd45b)}
+.v181play{width:100%;border:0;border-radius:22px;padding:20px;background:linear-gradient(135deg,#7a2600,#351000);color:#fff;font-size:25px;font-weight:1000;margin:12px 0}
+.v181grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.v181btn{border:0;border-radius:18px;padding:15px 8px;background:#172039;color:#fff;font-weight:900;font-size:14px}
+#v181Sheet{position:fixed;inset:0;z-index:9100;background:#000b;display:none;align-items:flex-end;color:#fff;font-family:system-ui}#v181Sheet.on{display:flex}.v181sheet{width:100%;max-height:76vh;overflow:auto;background:#070b1c;border-radius:28px 28px 0 0;padding:22px}.v181close{width:100%;border:0;border-radius:14px;padding:14px;font-weight:900;margin-top:12px}
+.v181item{background:#ffffff08;border:1px solid #ffffff10;border-radius:14px;padding:13px;margin:9px 0;text-align:left}.v181item strong{display:block}.v181item small{color:#ffffff66}.v181claim{margin-top:9px;width:100%;padding:10px;border:0;border-radius:10px;background:#b56c00;color:#fff;font-weight:900}.v181claim[disabled]{opacity:.35}
+.v181pop{position:fixed;z-index:9999;left:50%;top:42%;transform:translate(-50%,-50%);background:#09102aea;border:1px solid #ffffff20;border-radius:18px;padding:14px 20px;color:#fff;font-weight:1000;opacity:0;pointer-events:none}.v181pop.go{animation:v181pop .9s ease}@keyframes v181pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}25%,70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-58%) scale(.95)}}
 </style>
-<div class="v14-toast" id="v14Toast"></div><div class="v14-confetti" id="v14Confetti"></div>
-<div class="v14-badge">V14</div>
-<script id="v14-features">
-(()=>{
- const K='perfectStopV14';
- let s={combo:0,maxCombo:0,coins:0,lastDay:'',dailyPlays:0,missions:{play10:0,streak3:0}};
- try{s={...s,...JSON.parse(localStorage.getItem(K)||'{}')}}catch(e){}
- const save=()=>localStorage.setItem(K,JSON.stringify(s));
- const toast=(t)=>{let e=document.getElementById('v14Toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1600)};
- const confetti=()=>{let c=document.getElementById('v14Confetti');c.innerHTML='';for(let i=0;i<30;i++){let p=document.createElement('i');p.className='v14-piece';p.style.left=Math.random()*100+'vw';p.style.color=['#ffb000','#fff','#ff5b70','#6ee7ff'][i%4];p.style.setProperty('--dx',(Math.random()*180-90)+'px');p.style.animationDelay=(Math.random()*.25)+'s';c.appendChild(p)}setTimeout(()=>c.innerHTML='',1700)};
- const today=()=>new Date().toISOString().slice(0,10);
- if(s.lastDay!==today()){s.lastDay=today();s.dailyPlays=0;save();toast('🎁 Nouveau défi quotidien disponible');}
- // Observe result text changes to reward close stops without depending on old internal function names.
- const obs=new MutationObserver(()=>{
-   const body=document.body.innerText;
-   const m=[...body.matchAll(/([0-9]+\.[0-9]{3})s/g)].map(x=>+x[1]);
-   if(!m.length)return;
-   const d=Math.min(...m);
-   const sig=body.slice(0,400)+'|'+d;
-   if(window.__v14sig===sig)return; window.__v14sig=sig;
-   s.dailyPlays++; s.missions.play10=Math.min(10,(s.missions.play10||0)+1);
-   if(d<=.20){s.combo++;s.maxCombo=Math.max(s.maxCombo,s.combo);let gain=d<=.05?20:d<=.10?12:6;s.coins+=gain;
-      if(s.combo>=3)s.missions.streak3=1;
-      toast((d<=.05?'💎 PERFECT ! ':'🔥 Réussi ! ')+`+${gain} pièces • série x${s.combo}`); confetti();
-   } else { if(s.combo>=2) toast(`Série x${s.combo} terminée`); s.combo=0; }
-   save();
- },{subtree:true,childList:true,characterData:true});
- obs.observe(document.body,{subtree:true,childList:true,characterData:true});
- // Long-press title / keyboard shortcut opens compact V14 stats without changing game layout.
- const panel=()=>{
-   alert(`PERFECT STOP V14\n\n🔥 Série actuelle : ${s.combo}\n🏆 Meilleure série : ${s.maxCombo}\n🪙 Pièces : ${s.coins}\n🎯 Parties du jour : ${s.dailyPlays}\n\nMISSIONS\n• Jouer 10 fois : ${s.missions.play10}/10\n• Série x3 : ${s.missions.streak3?'Terminée':'À faire'}\n\nLes données sont sauvegardées sur cet appareil.`);
- };
- document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='v')panel()});
- let title=[...document.querySelectorAll('*')].find(e=>e.children.length===0&&/PERFECT STOP/i.test(e.textContent||''));
- if(title){let timer;title.addEventListener('touchstart',()=>timer=setTimeout(panel,700),{passive:true});title.addEventListener('touchend',()=>clearTimeout(timer),{passive:true});}
- // Make primary action feel more responsive.
- document.addEventListener('click',e=>{const t=e.target;if(t&&/START|STOP|REJOUER|JOUER/i.test(t.textContent||'')){t.classList.remove('v14-pulse');void t.offsetWidth;t.classList.add('v14-pulse')}},true);
- window.PerfectStopV14={stats:()=>({...s}),panel};
-})();
-</script>
-
-
-<style id="v15-style">
-#v15Home{position:fixed;inset:0;z-index:9000;background:radial-gradient(circle at 50% 0,#101d58 0,#03081e 45%,#01030d 100%);color:white;font-family:system-ui;display:flex;align-items:center;justify-content:center;padding:22px}
-#v15Home.hide{display:none}.v15card{width:min(100%,430px);text-align:center}.v15logo{font-size:38px;font-weight:1000;letter-spacing:4px}.v15sub{opacity:.6;margin:8px 0 25px}.v15rank{display:flex;justify-content:space-between;background:#ffffff09;border:1px solid #ffffff12;border-radius:18px;padding:15px;margin-bottom:13px}.v15xp{font-weight:900;color:#d69a21}
-.v15play,.v15btn{border:0;color:#fff;font-weight:900;border-radius:18px}.v15play{width:100%;font-size:25px;padding:21px;background:linear-gradient(135deg,#d18a00,#ffb52a);box-shadow:0 12px 35px #e69b0038}.v15grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}.v15btn{padding:15px;background:#10162d;border:1px solid #ffffff12;font-size:14px}
-#v15Sheet{position:fixed;inset:0;z-index:9100;background:#000b;display:none;align-items:flex-end;font-family:system-ui;color:#fff}#v15Sheet.on{display:flex}.v15sheetin{width:100%;background:#070b1c;border-radius:28px 28px 0 0;padding:22px;max-height:75vh;overflow:auto}.v15sheetin h2{margin:0 0 15px}.v15mission{background:#ffffff08;border:1px solid #ffffff10;border-radius:15px;padding:14px;margin:9px 0;display:flex;justify-content:space-between}.v15close{width:100%;margin-top:12px;padding:15px;border:0;border-radius:15px;font-weight:900}
-#v15Hud{position:fixed;left:10px;right:10px;top:8px;z-index:100;pointer-events:none;display:none;justify-content:space-between;font:800 12px system-ui;color:#fff9}#v15Hud.on{display:flex}
-</style>
-<div id="v15Home">
- <div class="v15card">
-  <div class="v15logo">PERFECT<br>STOP</div><div class="v15sub">Précision • Réflexes • Classement</div>
-  <div class="v15rank"><span>🏅 <b id="v15League">BRONZE</b></span><span class="v15xp" id="v15Coins">🪙 0</span></div>
-  <button class="v15play" id="v15Play">▶ JOUER</button>
-  <div class="v15grid"><button class="v15btn" data-v15="missions">🎯 MISSIONS</button><button class="v15btn" data-v15="stats">📊 PROFIL</button><button class="v15btn" data-v15="levels">🗺️ NIVEAUX</button><button class="v15btn" data-v15="rewards">🏆 RÉCOMPENSES</button></div>
+<div id="v181Home">
+ <div class="v181card">
+  <div class="v181logo">PERFECT<br>STOP</div>
+  <div class="v181ver">VERSION 18.1 • PARCOURS INFINI</div>
+  <div class="v181sub">Précision • Réflexes • Classement</div>
+  <div class="v181rank"><span>🏅 <b id="v181League">BRONZE</b></span><span>🪙 <b id="v181Coins">0</b></span></div>
+  <div class="v181road"><div class="v181roadtop"><span id="v181Path">Parcours #1</span><b id="v181Boss">Boss #5</b></div><div class="v181bar"><i id="v181Fill"></i></div></div>
+  <button class="v181play" id="v181Play">▶ JOUER</button>
+  <div class="v181grid"><button class="v181btn" data-v181="missions">🎯 MISSIONS</button><button class="v181btn" data-v181="profile">📊 PROFIL</button><button class="v181btn" data-v181="levels">🗺️ NIVEAUX</button><button class="v181btn" data-v181="rewards">🏆 RÉCOMPENSES</button></div>
  </div>
 </div>
-<div id="v15Sheet"><div class="v15sheetin"><h2 id="v15Title"></h2><div id="v15Content"></div><button class="v15close">FERMER</button></div></div>
-<div id="v15Hud"><span>🔥 <b id="v15Combo">0</b></span><span id="v15HudCoins">🪙 0</span></div>
-<script id="v15-features">
+<div id="v181Sheet"><div class="v181sheet"><h2 id="v181Title"></h2><div id="v181Content"></div><button class="v181close" id="v181Close">FERMER</button></div></div>
+<div class="v181pop" id="v181Pop"></div>
+<script id="v181-features">
 (()=>{
- let s={combo:0,maxCombo:0,coins:0,dailyPlays:0,missions:{play10:0,streak3:0}};
- try{s={...s,...JSON.parse(localStorage.getItem('perfectStopV14')||'{}')}}catch(e){}
- const $=x=>document.querySelector(x), home=$('#v15Home'),sheet=$('#v15Sheet');
- const refresh=()=>{$('#v15Coins').textContent='🪙 '+(s.coins||0);$('#v15HudCoins').textContent='🪙 '+(s.coins||0);$('#v15Combo').textContent=s.combo||0};
- refresh();
- $('#v15Play').onclick=()=>{home.classList.add('hide');$('#v15Hud').classList.add('on')};
- const open=(type)=>{
-   let title='',c='';
-   if(type==='missions'){title='🎯 Missions';c=`<div class=v15mission><span>Jouer 10 parties</span><b>${Math.min(10,s.missions?.play10||0)}/10</b></div><div class=v15mission><span>Faire une série x3</span><b>${s.missions?.streak3?'✅':'0/1'}</b></div><div class=v15mission><span>Défi du jour</span><b>${(s.dailyPlays||0)>=5?'✅':'À faire'}</b></div>`}
-   if(type==='stats'){title='📊 Profil';c=`<div class=v15mission><span>Meilleure série</span><b>x${s.maxCombo||0}</b></div><div class=v15mission><span>Pièces gagnées</span><b>${s.coins||0}</b></div><div class=v15mission><span>Parties aujourd’hui</span><b>${s.dailyPlays||0}</b></div>`}
-   if(type==='levels'){title='🗺️ Les 5 niveaux';c='<div class=v15mission><span>1 • Classique</span><b>🎯</b></div><div class=v15mission><span>2 • Disparition</span><b>👻</b></div><div class=v15mission><span>3 • Mémoire</span><b>🧠</b></div><div class=v15mission><span>4 • Turbo</span><b>⚡</b></div><div class=v15mission><span>5 • Chaos</span><b>👑</b></div>'}
-   if(type==='rewards'){title='🏆 Récompenses';c='<div class=v15mission><span>🥉 Bronze</span><b>Départ</b></div><div class=v15mission><span>🥈 Argent</span><b>500 XP</b></div><div class=v15mission><span>🥇 Or</span><b>1500 XP</b></div><div class=v15mission><span>💎 Diamant</span><b>5000 XP</b></div>'}
-   $('#v15Title').textContent=title;$('#v15Content').innerHTML=c;sheet.classList.add('on');
- };
- document.querySelectorAll('[data-v15]').forEach(b=>b.onclick=()=>open(b.dataset.v15));
- $('.v15close').onclick=()=>sheet.classList.remove('on');sheet.onclick=e=>{if(e.target===sheet)sheet.classList.remove('on')};
- // Keep new HUD synced with V14's persisted competitive stats.
- setInterval(()=>{try{s={...s,...JSON.parse(localStorage.getItem('perfectStopV14')||'{}')};refresh()}catch(e){}},600);
- // Return to menu by tapping the V15 HUD coin counter.
- $('#v15HudCoins').style.pointerEvents='auto';$('#v15HudCoins').onclick=()=>{home.classList.remove('hide');$('#v15Hud').classList.remove('on')};
-})();
-</script>
-
-
-<style id="v16-style">
-/* V16 CLEANUP + UNIFIED META */
-.v14-badge,#v15Hud{display:none!important}
-#v15Home{background:radial-gradient(circle at 50% 0,#17255e 0,#05091d 48%,#01030b 100%)}
-.v15logo small{display:block;font-size:11px;letter-spacing:2px;color:#ffffff66;margin-top:8px}
-.v16-homebtn{border:0;border-radius:999px;background:#ffffff0d;color:#fff;padding:5px 8px;font-size:12px}
-.v16-mission{background:#ffffff08;border:1px solid #ffffff10;border-radius:15px;padding:13px;margin:9px 0}
-.v16-mission-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
-.v16-progress{height:7px;background:#ffffff12;border-radius:999px;overflow:hidden;margin-top:8px}
-.v16-progress i{display:block;height:100%;background:linear-gradient(90deg,#ff9f0a,#ffd45b);border-radius:999px}
-.v16-claim{margin-top:9px;width:100%;padding:10px;border:0;border-radius:11px;background:#d48600;color:#fff;font-weight:900}
-.v16-claim[disabled]{opacity:.35}
-.v16-reward{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#ffffff08;border:1px solid #ffffff10;border-radius:15px;padding:13px;margin:9px 0;text-align:left}
-.v16-reward .ico{font-size:25px}.v16-reward small{display:block;color:#ffffff66;margin-top:2px}
-.v16-equip{border:0;border-radius:10px;padding:8px 10px;background:#ffffff12;color:#fff;font-weight:800}
-.v16-equip.on{background:#2e7447}.v16-equip.lock{opacity:.35}
-.v16-level{display:flex;align-items:center;gap:10px;background:#ffffff08;border:1px solid #ffffff10;border-radius:14px;padding:12px;margin:8px 0;text-align:left}
-.v16-level .n{width:32px;height:32px;border-radius:999px;display:grid;place-items:center;background:#ffffff10;font-weight:900}
-.v16-level.done .n{background:#2e7447}.v16-level.now{border-color:#d9952466}
-body.v16-gold{background:radial-gradient(circle at 50% 8%,#4a3414,#100c08 62%)!important}
-body.v16-neon{background:radial-gradient(circle at 50% 8%,#213153,#070815 58%,#03040b)!important}
-body.v16-diamond{background:radial-gradient(circle at 50% 8%,#17364f,#050b18 58%,#02040b)!important}
-body.v16-gold .btn{box-shadow:0 0 22px #d9a22933}
-body.v16-neon .btn{box-shadow:0 0 22px #66e2ff33}
-body.v16-diamond .btn{box-shadow:0 0 25px #9ce8ff44}
-</style>
-<script id="v16-features">
-(()=>{
- const LS=localStorage;
- const q=s=>document.querySelector(s);
- const qa=s=>[...document.querySelectorAll(s)];
- const readMeta=()=>{let m={coins:0,dailyPlays:0};try{m={...m,...JSON.parse(LS.getItem('perfectStopV14')||'{}')}}catch(e){}return m};
- const writeMeta=m=>LS.setItem('perfectStopV14',JSON.stringify(m));
- const xp=()=>+(LS.psXP||0),attempts=()=>+(LS.psTotalAttempts||0),wins=()=>+(LS.psTotalWins||0),bestStreak=()=>+(LS.psBestStreak||0),level=()=>+(LS.psLevel||1);
- let claims={};try{claims=JSON.parse(LS.psV16Claims||'{}')}catch(e){}
- const saveClaims=()=>LS.psV16Claims=JSON.stringify(claims);
- const league=()=>xp()>=2500?'DIAMANT':xp()>=1200?'OR':xp()>=500?'ARGENT':'BRONZE';
- const themes=[
-  {id:'classic',ico:'🥉',name:'Classique',need:'Débloqué',ok:()=>true},
-  {id:'neon',ico:'🌌',name:'Néon',need:'100 pièces',ok:()=>readMeta().coins>=100},
-  {id:'gold',ico:'🥇',name:'Or',need:'500 XP',ok:()=>xp()>=500},
-  {id:'diamond',ico:'💎',name:'Diamant',need:'2500 XP',ok:()=>xp()>=2500}
- ];
- const applyTheme=id=>{document.body.classList.remove('v16-neon','v16-gold','v16-diamond');if(id!=='classic')document.body.classList.add('v16-'+id);LS.psV16Theme=id};
- applyTheme(LS.psV16Theme||'classic');
-
- // Clean old V14/V15 overlay HUD completely.
- qa('.v14-badge').forEach(e=>e.remove());
- const oldHud=q('#v15Hud'); if(oldHud) oldHud.remove();
-
- // Make menu version + unified rank/coins.
- const logo=q('.v15logo'); if(logo && !logo.querySelector('small')) logo.insertAdjacentHTML('beforeend','<small>VERSION 16 • COMPÉTITION</small>');
- const refreshHome=()=>{
-   const m=readMeta();
-   const lg=q('#v15League'),co=q('#v15Coins');
-   if(lg)lg.textContent=league();
-   if(co)co.textContent='🪙 '+m.coins;
- };
- refreshHome();
-
- // Add a real Menu button to game top bar.
- const stats=q('#statsBtn');
- if(stats && !q('#v16MenuBtn')){
-   const b=document.createElement('button');b.id='v16MenuBtn';b.className='v16-homebtn';b.textContent='🏠';
-   stats.insertAdjacentElement('afterend',b);
-   b.onclick=()=>q('#v15Home')?.classList.remove('hide');
- }
-
- const sheet=q('#v15Sheet'),title=q('#v15Title'),content=q('#v15Content');
- const openSheet=(name,html)=>{title.textContent=name;content.innerHTML=html;sheet.classList.add('on')};
-
- const missionDefs=()=>[
-  {id:'attempt10',title:'Jouer 10 parties',v:attempts(),goal:10,reward:50},
-  {id:'streak3',title:'Faire une série x3',v:bestStreak(),goal:3,reward:100},
-  {id:'wins10',title:'Obtenir 10 réussites',v:wins(),goal:10,reward:150}
- ];
- const missionHTML=()=>missionDefs().map(m=>{
-   const done=m.v>=m.goal,claimed=claims[m.id];
-   return `<div class="v16-mission"><div class="v16-mission-head"><span>${done?'✅':'🎯'} ${m.title}</span><b>${Math.min(m.v,m.goal)}/${m.goal}</b></div>
-   <div class="v16-progress"><i style="width:${Math.min(100,m.v/m.goal*100)}%"></i></div>
-   <button class="v16-claim" data-claim="${m.id}" ${(!done||claimed)?'disabled':''}>${claimed?'RÉCUPÉRÉ':`RÉCUPÉRER +${m.reward} 🪙`}</button></div>`
- }).join('');
-
- const profileHTML=()=>{let m=readMeta(),a=attempts(),w=wins();return `
-  <div class="v15mission"><span>Ligue</span><b>${league()}</b></div>
-  <div class="v15mission"><span>XP</span><b>${xp()}</b></div>
-  <div class="v15mission"><span>Pièces</span><b>${m.coins}</b></div>
-  <div class="v15mission"><span>Essais total</span><b>${a}</b></div>
-  <div class="v15mission"><span>Réussites</span><b>${w}</b></div>
-  <div class="v15mission"><span>Taux de réussite</span><b>${a?Math.round(w/a*100):0}%</b></div>
-  <div class="v15mission"><span>Meilleure série</span><b>x${bestStreak()}</b></div>`};
-
- const levelsHTML=()=>{
-  const names=['Échauffement','Disparition','Mémoire','Cible Random','Aveugle Total'],icons=['🎯','👻','🧠','🎲','👑'],lv=level();
-  return names.map((n,i)=>`<div class="v16-level ${i+1<lv?'done':i+1===lv?'now':''}"><span class="n">${i+1}</span><div><b>${icons[i]} ${n}</b><small style="display:block;color:#ffffff66">${i+1<lv?'Terminé':i+1===lv?'Niveau actuel':'À débloquer'}</small></div></div>`).join('')
- };
- const rewardsHTML=()=>{
-  const equipped=LS.psV16Theme||'classic';
-  return themes.map(t=>`<div class="v16-reward"><span class="ico">${t.ico}</span><div><b>${t.name}</b><small>${t.need}</small></div>
-   <button class="v16-equip ${equipped===t.id?'on':''} ${!t.ok()?'lock':''}" data-theme="${t.id}" ${!t.ok()?'disabled':''}>${equipped===t.id?'ÉQUIPÉ':'CHOISIR'}</button></div>`).join('')
- };
-
- qa('[data-v15]').forEach(b=>{
-  b.onclick=()=>{
-   const type=b.dataset.v15;
-   if(type==='missions')openSheet('🎯 MISSIONS',missionHTML());
-   if(type==='stats')openSheet('📊 PROFIL',profileHTML());
-   if(type==='levels')openSheet('🗺️ NIVEAUX',levelsHTML());
-   if(type==='rewards')openSheet('🏆 RÉCOMPENSES',rewardsHTML());
-  }
- });
-
- content?.addEventListener('click',e=>{
-  const c=e.target.closest('[data-claim]');
-  if(c){
-    const m=missionDefs().find(x=>x.id===c.dataset.claim);
-    if(m && m.v>=m.goal && !claims[m.id]){
-      let meta=readMeta();meta.coins=(meta.coins||0)+m.reward;writeMeta(meta);claims[m.id]=true;saveClaims();refreshHome();
-      openSheet('🎯 MISSIONS',missionHTML());
-    }
-  }
-  const t=e.target.closest('[data-theme]');
-  if(t && !t.disabled){applyTheme(t.dataset.theme);openSheet('🏆 RÉCOMPENSES',rewardsHTML())}
- });
-
- // Keep menu numbers genuinely synced with game storage.
- setInterval(refreshHome,500);
-})();
-</script>
-
-
-<style id="v17-style">
-#v17Season{margin:8px 0 0;font-size:12px;color:#ffffff8a;letter-spacing:.8px}
-#v17Road{margin-top:12px;background:#ffffff06;border:1px solid #ffffff0c;border-radius:16px;padding:12px;text-align:left}
-#v17RoadTop{display:flex;justify-content:space-between;align-items:center;font-size:12px}
-#v17RoadTop b{color:#e6a62c}
-.v17bar{height:8px;background:#ffffff12;border-radius:99px;overflow:hidden;margin-top:8px}
-.v17bar i{display:block;height:100%;background:linear-gradient(90deg,#e7790b,#ffd15a);border-radius:99px}
-.v17-pop{position:fixed;z-index:9999;left:50%;top:44%;transform:translate(-50%,-50%) scale(.7);padding:18px 24px;border-radius:20px;background:#080d25eF;border:1px solid #ffffff20;color:#fff;font-size:25px;font-weight:1000;opacity:0;pointer-events:none;text-align:center}
-.v17-pop.go{animation:v17pop .85s ease}
-@keyframes v17pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-58%) scale(.95)}}
-.v17-card{background:#ffffff07;border:1px solid #ffffff10;border-radius:15px;padding:13px;margin:9px 0;text-align:left}
-.v17-card strong{display:block;font-size:16px}.v17-card small{color:#ffffff77}
-.v17-pill{display:inline-block;margin-top:7px;padding:5px 9px;border-radius:999px;background:#ffffff0d;font-size:11px}
-</style>
-<script id="v17-features">
-(()=>{
- const LS=localStorage,q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
- const n=(k,d=0)=>+(LS.getItem(k)||d);
- const set=(k,v)=>LS.setItem(k,v);
- const cycle=()=>Math.max(1,n('psV17Cycle',1));
- const stage=()=>Math.max(1,n('psLevel',1));
- const worldLevel=()=>((cycle()-1)*5)+stage();
- const rank=()=>{
-   const x=n('psXP');
-   if(x>=10000)return 'MAÎTRE';
-   if(x>=5000)return 'DIAMANT';
-   if(x>=2500)return 'PLATINE';
-   if(x>=1200)return 'OR';
-   if(x>=500)return 'ARGENT';
-   return 'BRONZE';
- };
- const challengeNames=['PRÉCISION','DISPARITION','MÉMOIRE','RANDOM','BOSS'];
- const targetFor=lv=>Math.max(.045,.20-(Math.floor((lv-1)/5)*.012));
- const winsNeeded=lv=>lv%5===0?3:1;
- const currentName=()=>challengeNames[(stage()-1)%5];
- const pop=(txt)=>{
-   let p=q('#v17Pop');if(!p){p=document.createElement('div');p.id='v17Pop';p.className='v17-pop';document.body.appendChild(p)}
-   p.innerHTML=txt;p.classList.remove('go');void p.offsetWidth;p.classList.add('go')
- };
- // Add season/road information to the home.
- const logo=q('.v15logo');
- if(logo && !q('#v17Season')) logo.insertAdjacentHTML('afterend',`<div id="v17Season">SAISON 1 • PARCOURS SANS FIN</div>`);
- const home=q('#v15Home');
- if(home && !q('#v17Road')){
-   const menu=home.querySelector('.v15menu');
-   const road=document.createElement('div');road.id='v17Road';
-   road.innerHTML='<div id="v17RoadTop"></div><div class="v17bar"><i id="v17RoadBar"></i></div>';
-   (menu||home).insertAdjacentElement(menu?'beforebegin':'beforeend',road);
- }
- const updateRoad=()=>{
-   const lv=worldLevel(),st=stage(),cy=cycle();
-   const rt=q('#v17RoadTop'),rb=q('#v17RoadBar');
-   if(rt)rt.innerHTML=`<span>🛣️ Parcours <b>#${lv}</b> • ${currentName()}</span><span>${rank()}</span>`;
-   if(rb)rb.style.width=((st-1)/5*100)+'%';
-   const lg=q('#v15League');if(lg)lg.textContent=rank();
- };
- updateRoad();
-
- // Replace misleading fixed level-5 message with current objective.
- const updateObjective=()=>{
-   const el=q('#lockMsg'); if(!el)return;
-   const lv=worldLevel(),goal=winsNeeded(lv),tol=targetFor(lv);
-   el.textContent=stage()===5?`👑 BOSS : ${goal} réussites à ≤ ${tol.toFixed(3)}s`:`Parcours #${lv} • objectif ≤ ${tol.toFixed(3)}s`;
- };
- updateObjective();
-
- // Upgrade level sheet to explain endless loop.
- const oldButtons=qa('[data-v15="levels"]');
- oldButtons.forEach(btn=>btn.addEventListener('click',()=>{
-   setTimeout(()=>{
-     const c=q('#v15Content');if(!c)return;
-     c.insertAdjacentHTML('beforeend',`<div class="v17-card"><strong>♾️ APRÈS LE NIVEAU 5</strong><small>Le parcours recommence avec des objectifs plus difficiles. Les niveaux 10, 15, 20… sont des BOSS. Ta progression n'a plus de fin.</small><span class="v17-pill">Parcours actuel #${worldLevel()}</span></div>`)
-   },0)
- }));
-
- // New reward ladder.
- const rewardBtn=qa('[data-v15="rewards"]');
- rewardBtn.forEach(btn=>btn.addEventListener('click',()=>{
-   setTimeout(()=>{
-    const c=q('#v15Content');if(!c)return;
-    c.insertAdjacentHTML('beforeend',`
-      <div class="v17-card"><strong>🎁 PALIERS DE SAISON</strong><small>50 XP : +25 🪙 • 250 XP : +50 🪙 • 500 XP : Argent • 1200 XP : Or • 2500 XP : Platine • 5000 XP : Diamant • 10000 XP : Maître.</small></div>`)
-   },0)
- }));
-
- // Daily challenge, persisted by local date.
- const day=new Date().toISOString().slice(0,10);
- if(LS.psV17Day!==day){LS.psV17Day=day;LS.psV17DailyStart=n('psTotalAttempts');LS.psV17DailyClaim='0'}
- const dailyProgress=()=>Math.max(0,n('psTotalAttempts')-n('psV17DailyStart'));
- qa('[data-v15="missions"]').forEach(btn=>btn.addEventListener('click',()=>{
-  setTimeout(()=>{
-   const c=q('#v15Content');if(!c)return;
-   const p=dailyProgress(),done=p>=5,claimed=LS.psV17DailyClaim==='1';
-   c.insertAdjacentHTML('afterbegin',`<div class="v16-mission"><div class="v16-mission-head"><span>📅 Défi du jour : 5 parties</span><b>${Math.min(5,p)}/5</b></div><div class="v16-progress"><i style="width:${Math.min(100,p/5*100)}%"></i></div><button id="v17DailyClaim" class="v16-claim" ${(!done||claimed)?'disabled':''}>${claimed?'RÉCUPÉRÉ':'RÉCUPÉRER +75 🪙'}</button></div>`);
-   q('#v17DailyClaim')?.addEventListener('click',()=>{
-     let m={coins:0};try{m={...m,...JSON.parse(LS.perfectStopV14||'{}')}}catch(e){}
-     m.coins=(m.coins||0)+75;LS.perfectStopV14=JSON.stringify(m);LS.psV17DailyClaim='1';pop('🎁 +75 🪙');q('#v15Close')?.click()
-   })
-  },0)
- }));
-
- // Observe results to add spectacle and detect successful progression.
- let lastAttempts=n('psTotalAttempts'),lastWins=n('psTotalWins'),cycleWins=n('psV17CycleWins');
- setInterval(()=>{
-   const a=n('psTotalAttempts'),w=n('psTotalWins');
-   if(a>lastAttempts){
-     if(w>lastWins){
-       cycleWins++;
-       set('psV17CycleWins',cycleWins);
-       pop(cycleWins>=winsNeeded(worldLevel())?'🏆 NIVEAU VALIDÉ !':'🔥 PERFECT !');
-       if(cycleWins>=winsNeeded(worldLevel())){
-         cycleWins=0;set('psV17CycleWins',0);
-         // Only extend beyond level 5; existing game still controls 1→5.
-         if(stage()>=5){
-           set('psV17Cycle',cycle()+1);
-           set('psLevel',1);
-           setTimeout(()=>{pop(`🚀 PARCOURS #${worldLevel()}`);updateRoad();updateObjective()},900);
-         }
-       }
-     } else {
-       pop('⚡ ENCORE !');
-     }
-     lastAttempts=a;lastWins=w;updateRoad();updateObjective();
-   }
- },350);
-})();
-</script>
-
-
-<style id="v171-fix">
-/* V17.1 mobile layout fix */
-#v15Home{overflow-x:hidden}
-.v15card{width:min(92vw,430px)!important;max-width:430px}
-.v15logo{font-size:34px;line-height:1.02}
-.v15logo small{font-size:10px!important;letter-spacing:1.5px!important}
-#v17Season{font-size:11px!important;margin:10px 0 4px!important}
-.v15sub{font-size:15px;margin:8px 0 18px!important;white-space:normal}
-.v15rank{margin-bottom:10px!important}
-#v17Road{width:100%;margin:0 0 12px!important;padding:12px!important}
-#v17RoadTop{display:flex!important;flex-direction:column;align-items:flex-start!important;gap:4px}
-#v17RoadTop span:last-child{align-self:flex-end;margin-top:-22px}
-.v15play{margin-top:0}
-.v15grid{grid-template-columns:1fr 1fr!important}
-@media(max-width:390px){
- .v15logo{font-size:30px}
- .v15grid{gap:8px}
- .v15btn{font-size:13px;padding:13px 8px}
- .v15play{font-size:22px;padding:18px}
-}
-</style>
-<script id="v171-fix-script">
-(()=>{
- const q=s=>document.querySelector(s);
- const small=q('.v15logo small');
- if(small) small.textContent='VERSION 17.1 • COMPÉTITION';
- const road=q('#v17Road');
- const rank=q('.v15rank');
- if(road && rank && road.previousElementSibling!==rank){
-   rank.insertAdjacentElement('afterend',road);
- }
-})();
-</script>
-
-
-<style id="v18-style">
-/* PERFECT STOP V18 — content update */
-.v18-next{font-size:12px;color:#ffd45b;font-weight:900}
-.v18-sub{font-size:10px;color:#ffffff66;margin-top:3px}
-.v18-box{background:#ffffff07;border:1px solid #ffffff10;border-radius:15px;padding:13px;margin:9px 0;text-align:left}
-.v18-box strong{display:block;font-size:15px}
-.v18-chip{display:inline-block;margin-top:7px;padding:5px 8px;border-radius:999px;background:#ffffff0d;font-size:10px}
-.v18-boss{border-color:#ffb32955;background:linear-gradient(135deg,#3a180b44,#ffffff05)}
-.v18-special{border-color:#56d6ff44;background:linear-gradient(135deg,#0c2f3c44,#ffffff05)}
-.v18-reward{display:flex;justify-content:space-between;align-items:center;background:#ffffff08;border:1px solid #ffffff10;border-radius:13px;padding:12px;margin:8px 0}
-.v18-progress{height:8px;background:#ffffff12;border-radius:999px;overflow:hidden;margin-top:8px}
-.v18-progress i{display:block;height:100%;background:linear-gradient(90deg,#ff9b16,#ffd25a);border-radius:999px}
-.v18-banner{margin:8px 0 12px;padding:10px 12px;border-radius:14px;background:#ffffff08;border:1px solid #ffffff10;text-align:left}
-.v18-banner b{color:#ffd45b}
-</style>
-<script id="v18-features">
-(()=>{
- const LS=localStorage,q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
- const num=(k,d=0)=>+(LS.getItem(k)||d), put=(k,v)=>LS.setItem(k,v);
- const cycle=()=>Math.max(1,num('psV17Cycle',1));
+ const LS=localStorage,$=id=>document.getElementById(id);
+ const num=(k,d=0)=>+(LS.getItem(k)||d);
+ const cycle=()=>Math.max(1,num('psV181Cycle',1));
  const stage=()=>Math.max(1,num('psLevel',1));
- const worldLevel=()=>((cycle()-1)*5)+stage();
- const bossEvery=5;
- const bossLevel=()=>Math.ceil(worldLevel()/bossEvery)*bossEvery;
- const variantFor=lv=>{
-   if(lv%5===0)return {name:'BOSS TRIPLE',ico:'👑',desc:'3 réussites consécutives',boss:true};
-   const arr=[
-     {name:'CLASSIQUE',ico:'🎯',desc:'Chrono visible'},
-     {name:'DISPARITION',ico:'👻',desc:'Le chrono disparaît'},
-     {name:'MÉMOIRE',ico:'🧠',desc:'Observe puis mémorise'},
-     {name:'CIBLE RANDOM',ico:'🎲',desc:'Objectif aléatoire'},
-     {name:'AVEUGLE',ico:'🌑',desc:'Aucun chrono visible'},
-     {name:'RUSH',ico:'⚡',desc:'Cible plus courte'},
-     {name:'DOUBLE',ico:'✌️',desc:'Deux arrêts à réussir'},
-     {name:'MIROIR',ico:'🪞',desc:'Piège visuel'},
-     {name:'SUDDEN DEATH',ico:'💀',desc:'Un seul essai'}
-   ];
-   return arr[(lv-1)%arr.length];
+ const world=()=>((cycle()-1)*5)+stage();
+ const xp=()=>num('psXP');
+ const league=()=>xp()>=10000?'MAÎTRE':xp()>=5000?'DIAMANT':xp()>=2500?'PLATINE':xp()>=1200?'OR':xp()>=500?'ARGENT':'BRONZE';
+ let coins=num('psV181Coins',0);
+ // Repair corrupted old values once.
+ if(!Number.isFinite(coins)||coins<0||coins>10000){coins=0;LS.psV181Coins='0'}
+ let claims={};try{claims=JSON.parse(LS.psV181Claims||'{}')}catch(e){}
+ const variants=['🎯 CLASSIQUE','👻 DISPARITION','🧠 MÉMOIRE','🎲 RANDOM','👑 BOSS'];
+ const tolerance=lv=>Math.max(.05,.20-Math.floor((lv-1)/5)*.01);
+ const pop=t=>{let p=$('v181Pop');p.textContent=t;p.classList.remove('go');void p.offsetWidth;p.classList.add('go')};
+ const save=()=>LS.psV181Coins=String(coins);
+ const refresh=()=>{
+   const lv=world(),st=stage();
+   $('v181League').textContent=league();$('v181Coins').textContent=coins;
+   $('v181Path').textContent=`${variants[(st-1)%5]} • Parcours #${lv}`;
+   $('v181Boss').textContent=`Boss #${Math.ceil(lv/5)*5}`;
+   $('v181Fill').style.width=((st-1)/5*100)+'%';
  };
- const difficulty=lv=>{
-   const tier=Math.floor((lv-1)/5);
-   return Math.max(.045,.20-tier*.012);
- };
- const rewardFor=lv=>20+Math.floor(lv/5)*5;
- const meta=()=>{let m={coins:0};try{m={...m,...JSON.parse(LS.perfectStopV14||'{}')}}catch(e){}return m};
- const saveMeta=m=>LS.perfectStopV14=JSON.stringify(m);
- const toast=t=>{
-   let p=q('#v17Pop'); if(!p){p=document.createElement('div');p.id='v17Pop';p.className='v17-pop';document.body.appendChild(p)}
-   p.innerHTML=t;p.classList.remove('go');void p.offsetWidth;p.classList.add('go')
- };
-
- // Clean duplicate rank on road and replace by next boss info.
- const refreshRoad=()=>{
-   const rt=q('#v17RoadTop'); if(!rt)return;
-   const v=variantFor(worldLevel());
-   rt.innerHTML=`<span>${v.ico} Parcours <b>#${worldLevel()}</b> • ${v.name}</span><span class="v18-next">Boss #${bossLevel()}</span>`;
- };
- refreshRoad();
-
- // Add a compact next-objective banner under the road.
- const road=q('#v17Road');
- if(road && !q('#v18Banner')){
-   road.insertAdjacentHTML('afterend',`<div id="v18Banner" class="v18-banner"></div>`);
- }
- const refreshBanner=()=>{
-   const b=q('#v18Banner');if(!b)return;
-   const lv=worldLevel(),v=variantFor(lv),tol=difficulty(lv),rew=rewardFor(lv);
-   b.innerHTML=`<b>${v.ico} ${v.name}</b><div class="v18-sub">${v.desc} • objectif ≤ ${tol.toFixed(3)}s • récompense ${rew} 🪙</div>`;
- };
- refreshBanner();
-
- // Expand levels/content sheet.
- qa('[data-v15="levels"]').forEach(btn=>btn.addEventListener('click',()=>{
-   setTimeout(()=>{
-     const c=q('#v15Content'); if(!c)return;
-     const lv=worldLevel();
-     const upcoming=[];
-     for(let i=lv;i<lv+6;i++){
-       const v=variantFor(i);
-       upcoming.push(`<div class="v18-box ${v.boss?'v18-boss':'v18-special'}"><strong>${v.ico} Parcours #${i} • ${v.name}</strong><small>${v.desc}</small><span class="v18-chip">Objectif ≤ ${difficulty(i).toFixed(3)}s</span></div>`)
-     }
-     c.insertAdjacentHTML('afterbegin',`<div class="v18-box"><strong>♾️ PROCHAINS PARCOURS</strong><small>La difficulté augmente tous les 5 parcours. Les Boss reviennent régulièrement.</small></div>${upcoming.join('')}`)
-   },0)
- }));
-
- // Reward milestones that are actually claimable.
- const milestoneDefs=()=>[
-   {id:'p10',need:10,reward:50,label:'Atteindre le parcours 10'},
-   {id:'p20',need:20,reward:100,label:'Atteindre le parcours 20'},
-   {id:'p35',need:35,reward:175,label:'Atteindre le parcours 35'},
-   {id:'p50',need:50,reward:300,label:'Atteindre le parcours 50'}
+ refresh();
+ $('v181Play').onclick=()=>$('v181Home').classList.add('hide');
+ $('v181Close').onclick=()=>$('v181Sheet').classList.remove('on');
+ $('v181Sheet').onclick=e=>{if(e.target===$('v181Sheet'))$('v181Sheet').classList.remove('on')};
+ const missions=()=>[
+   {id:'a10',title:'Jouer 10 parties',v:num('psTotalAttempts'),g:10,r:50},
+   {id:'w10',title:'Réussir 10 fois',v:num('psTotalWins'),g:10,r:100},
+   {id:'s3',title:'Faire une série x3',v:num('psBestStreak'),g:3,r:75}
  ];
- let claimed={};try{claimed=JSON.parse(LS.psV18Claims||'{}')}catch(e){}
- const saveClaims=()=>LS.psV18Claims=JSON.stringify(claimed);
-
- qa('[data-v15="rewards"]').forEach(btn=>btn.addEventListener('click',()=>{
-   setTimeout(()=>{
-     const c=q('#v15Content'); if(!c)return;
-     const lv=worldLevel();
-     const blocks=milestoneDefs().map(m=>{
-       const done=lv>=m.need,cl=claimed[m.id];
-       return `<div class="v18-reward"><div><b>${done?'✅':'🔒'} ${m.label}</b><div class="v18-sub">+${m.reward} pièces</div></div><button class="v16-claim" data-v18claim="${m.id}" ${(!done||cl)?'disabled':''}>${cl?'RÉCUPÉRÉ':'RÉCUPÉRER'}</button></div>`
-     }).join('');
-     c.insertAdjacentHTML('afterbegin',`<div class="v18-box"><strong>🎁 PALIERS DE PARCOURS</strong><small>Plus tu avances, plus tu débloques de pièces.</small></div>${blocks}`)
-   },0)
- }));
-
- q('#v15Content')?.addEventListener('click',e=>{
-   const b=e.target.closest('[data-v18claim]'); if(!b)return;
-   const d=milestoneDefs().find(x=>x.id===b.dataset.v18claim); if(!d||claimed[d.id]||worldLevel()<d.need)return;
-   const m=meta();m.coins=(m.coins||0)+d.reward;saveMeta(m);claimed[d.id]=true;saveClaims();toast(`🎁 +${d.reward} 🪙`);
-   b.disabled=true;b.textContent='RÉCUPÉRÉ';
- });
-
- // Boss progression logic: boss requires 3 consecutive successes.
- let bossStreak=num('psV18BossStreak',0),lastA=num('psTotalAttempts'),lastW=num('psTotalWins');
+ const open=(type)=>{
+   let title='',content='';
+   if(type==='missions'){title='🎯 MISSIONS';content=missions().map(m=>{let ok=m.v>=m.g,cl=claims[m.id];return `<div class=v181item><strong>${ok?'✅':'🎯'} ${m.title}</strong><small>${Math.min(m.v,m.g)}/${m.g}</small><button class=v181claim data-claim="${m.id}" ${(!ok||cl)?'disabled':''}>${cl?'RÉCUPÉRÉ':'RÉCUPÉRER +'+m.r+' 🪙'}</button></div>`}).join('')}
+   if(type==='profile'){let a=num('psTotalAttempts'),w=num('psTotalWins');title='📊 PROFIL';content=`<div class=v181item><strong>Ligue</strong><small>${league()}</small></div><div class=v181item><strong>XP</strong><small>${xp()}</small></div><div class=v181item><strong>Pièces</strong><small>${coins}</small></div><div class=v181item><strong>Taux de réussite</strong><small>${a?Math.round(w/a*100):0}% (${w}/${a})</small></div><div class=v181item><strong>Meilleure série</strong><small>x${num('psBestStreak')}</small></div>`}
+   if(type==='levels'){title='🗺️ PARCOURS';let arr=[];for(let i=world();i<world()+7;i++){let st=((i-1)%5)+1;arr.push(`<div class="v181item"><strong>${variants[st-1]} • #${i}</strong><small>Objectif ≤ ${tolerance(i).toFixed(3)} s${st===5?' • Boss : 3 réussites':''}</small></div>`)}content=`<div class=v181item><strong>♾️ Pas de fin</strong><small>Après chaque Boss, les 5 épreuves recommencent avec une précision plus difficile.</small></div>`+arr.join('')}
+   if(type==='rewards'){title='🏆 RÉCOMPENSES';content='<div class=v181item><strong>🥈 Argent</strong><small>500 XP</small></div><div class=v181item><strong>🥇 Or</strong><small>1200 XP</small></div><div class=v181item><strong>🏆 Platine</strong><small>2500 XP</small></div><div class=v181item><strong>💎 Diamant</strong><small>5000 XP</small></div><div class=v181item><strong>👑 Maître</strong><small>10000 XP</small></div>'}
+   $('v181Title').textContent=title;$('v181Content').innerHTML=content;$('v181Sheet').classList.add('on')
+ };
+ document.querySelectorAll('[data-v181]').forEach(b=>b.onclick=()=>open(b.dataset.v181));
+ $('v181Content').addEventListener('click',e=>{let b=e.target.closest('[data-claim]');if(!b)return;let m=missions().find(x=>x.id===b.dataset.claim);if(!m||m.v<m.g||claims[m.id])return;coins+=m.r;claims[m.id]=true;LS.psV181Claims=JSON.stringify(claims);save();refresh();open('missions');pop(`🎁 +${m.r} 🪙`)});
+ // Lightweight progression watcher: one check twice a second, no DOM observer, no self-triggering loop.
+ let lastA=num('psTotalAttempts'),lastW=num('psTotalWins'),boss=num('psV181Boss',0);
  setInterval(()=>{
    const a=num('psTotalAttempts'),w=num('psTotalWins');
-   if(a>lastA){
-     const lv=worldLevel(),isBoss=lv%5===0;
-     if(w>lastW){
-       if(isBoss){
-         bossStreak++;put('psV18BossStreak',bossStreak);
-         toast(`👑 BOSS ${bossStreak}/3`);
-         if(bossStreak>=3){
-           bossStreak=0;put('psV18BossStreak',0);
-           const m=meta(),gain=rewardFor(lv)*3;m.coins=(m.coins||0)+gain;saveMeta(m);
-           toast(`🏆 BOSS VAINCU • +${gain} 🪙`);
-         }
-       }else{
-         const m=meta(),gain=rewardFor(lv);m.coins=(m.coins||0)+gain;saveMeta(m);
-       }
-     } else if(isBoss){
-       bossStreak=0;put('psV18BossStreak',0);toast('💀 Boss raté • série remise à zéro');
-     }
-     lastA=a;lastW=w;refreshRoad();refreshBanner();
-   }
- },350);
-
- // Home subtitle/version.
- const small=q('.v15logo small'); if(small)small.textContent='VERSION 18 • PARCOURS INFINI';
+   if(a===lastA)return;
+   const success=w>lastW,st=stage(),lv=world();
+   if(success){
+     let gain=20+Math.floor(lv/5)*5;coins+=gain;save();pop(`✅ +${gain} 🪙`);
+     if(st===5){boss++;LS.psV181Boss=String(boss);if(boss>=3){boss=0;LS.psV181Boss='0';LS.psV181Cycle=String(cycle()+1);LS.psLevel='1';coins+=75;save();pop('👑 BOSS VAINCU • +75 🪙');setTimeout(()=>location.reload(),1000)}}
+   }else if(st===5){boss=0;LS.psV181Boss='0';pop('💀 Boss : série remise à zéro')}
+   lastA=a;lastW=w;refresh()
+ },500);
 })();
 </script>
 
