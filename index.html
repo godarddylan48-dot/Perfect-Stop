@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#081126">
-<title>Perfect Stop V13</title>
+<title>Perfect Stop V23.8</title>
 <style>
 *{box-sizing:border-box;touch-action:manipulation}
 html,body{margin:0;height:100%;overflow:hidden}
@@ -81,8 +81,11 @@ const N=['','ÉCHAUFFEMENT','DISPARITION','MÉMOIRE','CIBLE RANDOM','AVEUGLE TOT
 const H=['','Chrono visible','Disparaît après 5 s','Visible seulement 2 s','Cible aléatoire + disparition','Aucun chrono'];
 const HA=[99,99,5,2,2,0],BASE=[0,10,9,8,0,7];
 
-let level=+(localStorage.psLevel||1);if(level>5)level=1;
-let tries=0,totalRunTries=0,pts=+(localStorage.psPoints||0),xp=+(localStorage.psXP||0),running=false,start=0,raf,target=BASE[level]||10,runBest=999,daily=false,lastElapsed=0;
+let level=+(localStorage.psWorldLevel||localStorage.psLevel||1);if(level<1)level=1;
+function mode(){return ((level-1)%5)+1}
+function bossLevel(){return level%5===0}
+function levelTolerance(){return bossLevel()?.120:Math.max(.100,.200-Math.floor((level-1)/10)*.005)}
+let tries=0,totalRunTries=0,pts=+(localStorage.psPoints||0),xp=+(localStorage.psXP||0),running=false,start=0,raf,target=BASE[mode()]||10,runBest=999,daily=false,lastElapsed=0;
 let bests=JSON.parse(localStorage.psLevelBests||'[null,null,null,null,null,null]');
 let streak=+(localStorage.psStreak||0),bestStreak=+(localStorage.psBestStreak||0),runBestStreak=0;
 let totalWins=+(localStorage.psTotalWins||0),totalAttempts=+(localStorage.psTotalAttempts||0),perfects=+(localStorage.psPerfects||0);
@@ -146,10 +149,39 @@ $('world').onclick=()=>{daily=false;$('world').classList.add('on');$('today').cl
 $('today').onclick=()=>{daily=true;$('today').classList.add('on');$('world').classList.remove('on');board()};
 async function send(d,l){if(!pid||!secret||d>.20)return;await rpc('perfect_stop_submit_score',{p_player_id:pid,p_secret:secret,p_level:l,p_error_ms:Math.round(d*1000)});if(l===level)board()}
 
-function save(){localStorage.psLevel=level;localStorage.psPoints=pts;localStorage.psXP=xp;localStorage.psLevelBests=JSON.stringify(bests);localStorage.psStreak=streak;localStorage.psBestStreak=bestStreak;localStorage.psTotalWins=totalWins;localStorage.psTotalAttempts=totalAttempts;localStorage.psPerfects=perfects;updateTrophies()}
-function draw(){let t=$('track');t.innerHTML='';for(let i=1;i<=5;i++){let d=document.createElement('div');d.className='dot '+(i<level?'done ':'')+(i===level?'current':'');t.appendChild(d)}$('lvl').textContent='NIVEAU '+level+' • '+N[level];$('points').textContent=pts;$('tries').textContent=tries;$('streak').textContent='🔥 '+streak;$('runBest').textContent=runBest<999?runBest.toFixed(3)+'s':'—';if(level!==4)$('goal').textContent=BASE[level].toFixed(2);let r=rankInfo();$('rankChip').textContent=r[0]+' • '+xp+' XP';let pct=Math.min(100,((xp-r[1])/(r[2]-r[1]))*100);$('xpfill').style.width=pct+'%';$('xpText').textContent=(xp-r[1])+' / '+(r[2]-r[1])+' XP';$('nextRank').textContent=r[0]==='DIAMANT'?'MAX':(r[0]==='OR'?'DIAMANT':r[0]==='ARGENT'?'OR':'ARGENT');$('soundBtn').textContent=soundOn?'🔊':'🔇';$('progressText').textContent=level<5?'Prochaine étape : réussir ce niveau • '+H[level]:'Dernier niveau • vise le meilleur chrono';drawDaily();updateTrophies();board()}
+function save(){
+ localStorage.psWorldLevel=level;
+ localStorage.psLevel=mode();
+ localStorage.psV181Cycle=Math.floor((level-1)/5)+1;
+ localStorage.psV23MaxWorld=Math.max(+(localStorage.psV23MaxWorld||1),level);
+ localStorage.psV23MaxStage=Math.max(+(localStorage.psV23MaxStage||1),level);
+ localStorage.psPoints=pts;localStorage.psXP=xp;localStorage.psLevelBests=JSON.stringify(bests);
+ localStorage.psStreak=streak;localStorage.psBestStreak=bestStreak;localStorage.psTotalWins=totalWins;
+ localStorage.psTotalAttempts=totalAttempts;localStorage.psPerfects=perfects;updateTrophies()
+}
+function draw(){
+ let m=mode(),t=$('track');t.innerHTML='';
+ for(let i=1;i<=5;i++){
+   let d=document.createElement('div');
+   d.className='dot '+(i<m?'done ':'')+(i===m?'current':'');
+   t.appendChild(d)
+ }
+ $('lvl').textContent=(bossLevel()?'👑 BOSS ':'NIVEAU ')+level+' • '+(bossLevel()?'BOSS PRÉCISION':N[m]);
+ $('points').textContent=pts;$('tries').textContent=tries;$('streak').textContent='🔥 '+streak;
+ $('runBest').textContent=runBest<999?runBest.toFixed(3)+'s':'—';
+ if(m!==4)$('goal').textContent=BASE[m].toFixed(2);
+ let r=rankInfo();$('rankChip').textContent=r[0]+' • '+xp+' XP';
+ let pct=Math.min(100,((xp-r[1])/(r[2]-r[1]))*100);$('xpfill').style.width=pct+'%';
+ $('xpText').textContent=(xp-r[1])+' / '+(r[2]-r[1])+' XP';
+ $('nextRank').textContent=r[0]==='DIAMANT'?'MAX':(r[0]==='OR'?'DIAMANT':r[0]==='ARGENT'?'OR':'ARGENT');
+ $('soundBtn').textContent=soundOn?'🔊':'🔇';
+ $('progressText').textContent=bossLevel()
+   ?'👑 Boss niveau '+level+' • réussis une fois à ≤ '+levelTolerance().toFixed(3)+'s pour passer au niveau '+(level+1)
+   :'Prochain Boss : niveau '+(Math.ceil(level/5)*5)+' • '+H[m];
+ drawDaily();updateTrophies();board()
+}
 
-function loop(now){if(!running)return;lastElapsed=(now-start)/1000;if(level<5)$('timer').textContent=lastElapsed.toFixed(3);if(lastElapsed>=HA[level])$('timer').classList.add('hide');if(lastElapsed>=target+3)finishAttempt(lastElapsed);else raf=requestAnimationFrame(loop)}
+function loop(now){if(!running)return;lastElapsed=(now-start)/1000;let m=mode();if(m<5)$('timer').textContent=lastElapsed.toFixed(3);if(lastElapsed>=HA[m])$('timer').classList.add('hide');if(lastElapsed>=target+3)finishAttempt(lastElapsed);else raf=requestAnimationFrame(loop)}
 
 function finishAttempt(elapsed){
  if(!running)return;running=false;cancelAnimationFrame(raf);
@@ -158,7 +190,7 @@ function finishAttempt(elapsed){
  tries++;totalRunTries++;totalAttempts++;
  const old=bests[level],isRecord=old==null||d<old;
  runBest=Math.min(runBest,d);if(isRecord)bests[level]=d;
- const pass=d<=.20;let base=0;
+ const tol=levelTolerance(),pass=d<=tol;let base=0;
  if(d<.0005){base=100;perfects++}else if(d<=.03)base=50;else if(d<=.10)base=25;else if(pass)base=10;
 
  if(pass){
@@ -173,14 +205,20 @@ function finishAttempt(elapsed){
    if(isRecord){$('result').innerHTML+='<span class="record">✨ NOUVEAU RECORD PERSONNEL</span>';showToast('✨ Nouveau record !')}
    let ds=dailySpec();if(d<=ds.limit&&!dailyDone()){pts+=ds.bonus;xp+=ds.xp;localStorage.psDailyDone=dayKey();$('result').innerHTML+='<span class="record">🎯 DÉFI DU JOUR TERMINÉ • +'+ds.bonus+'</span>';showToast('🎯 Défi du jour terminé !')}
    send(d,played);
-   if(level<5){
-      level++;showToast('🔓 Niveau '+level+' débloqué');setTimeout(()=>{target=BASE[level]||10;$('goal').textContent=(level===4?'?':target.toFixed(2));draw()},650)
+   const wasBoss=bossLevel();
+   if(wasBoss){
+      trophies.master=true;localStorage.psTrophies=JSON.stringify(trophies);
+      beep(1040,.18,'triangle');confetti();
+      showToast('👑 BOSS '+level+' VAINCU ! Niveau '+(level+1));
    }else{
-      trophies.master=true;localStorage.psTrophies=JSON.stringify(trophies);beep(1040,.18,'triangle');confetti();setTimeout(showFinish,650)
+      showToast('🔓 Niveau '+(level+1)+' débloqué');
    }
+   level++;
+   save();
+   setTimeout(()=>{target=BASE[mode()]||10;$('goal').textContent=(mode()===4?'?':target.toFixed(2));draw()},650)
  }else{
    haptic([35,40,35]);beep(180,.12,'sawtooth');$('app').classList.add('shake');setTimeout(()=>$('app').classList.remove('shake'),320);
-   streak=0;$('result').innerHTML='❌ '+d.toFixed(3)+'s • objectif ≤ 0.20s<span class="direction">Temps : '+x.toFixed(3)+' s • '+(late?'⏰ Trop tard — appuie plus tôt':'⚡ Trop tôt — attends davantage')+'</span>'
+   streak=0;$('result').innerHTML='❌ '+d.toFixed(3)+'s • objectif ≤ '+tol.toFixed(3)+'s<span class="direction">Temps : '+x.toFixed(3)+' s • '+(late?'⏰ Trop tard — appuie plus tôt':'⚡ Trop tôt — attends davantage')+'</span>'
  }
  save();$('btn').textContent='REJOUER';draw()
 }
@@ -190,13 +228,14 @@ function showFinish(){
  $('trophyGrid').innerHTML=trophyDefs().map(([k,n,ok])=>'<div class="trophy '+(trophies[k]?'on':'')+'">'+n+'</div>').join('');
  $('finish').classList.add('show')
 }
-$('again').onclick=()=>{level=1;tries=0;totalRunTries=0;runBest=999;runBestStreak=0;streak=0;localStorage.psLevel=1;localStorage.psStreak=0;$('finish').classList.remove('show');$('goal').textContent='10.00';$('timer').textContent='0.000';$('result').textContent='Nouveau run !';draw()};
+$('again').onclick=()=>{tries=0;totalRunTries=0;runBest=999;runBestStreak=0;streak=0;localStorage.psStreak=0;$('finish').classList.remove('show');$('goal').textContent=(BASE[mode()]||10).toFixed(2);$('timer').textContent='0.000';$('result').textContent='Continue le parcours !';draw()};
 
 $('btn').onclick=()=>{
  if(running){finishAttempt((performance.now()-start)/1000);return}
- target=level===4?(Math.floor(Math.random()*301)+700)/100:BASE[level];
+ let m=mode();
+ target=m===4?(Math.floor(Math.random()*301)+700)/100:BASE[m];
  $('goal').textContent=target.toFixed(2);running=true;start=performance.now();lastElapsed=0;
- $('timer').textContent=level===5?'••••':'0.000';$('timer').classList.toggle('hide',level===5);
+ $('timer').textContent=m===5?'••••':'0.000';$('timer').classList.toggle('hide',m===5);
  $('result').textContent='STOP au bon moment !';$('btn').textContent='STOP';raf=requestAnimationFrame(loop)
 };
 
@@ -232,7 +271,7 @@ draw();ensurePlayer();
  const num=(k,d=0)=>+(LS.getItem(k)||d);
  const cycle=()=>Math.max(1,num('psV181Cycle',1));
  const stage=()=>Math.max(1,num('psLevel',1));
- const world=()=>((cycle()-1)*5)+stage();
+ const world=()=>Math.max(1,num('psWorldLevel',((cycle()-1)*5)+stage()));
  const xp=()=>num('psXP');
  const league=()=>xp()>=10000?'MAÎTRE':xp()>=5000?'DIAMANT':xp()>=2500?'PLATINE':xp()>=1200?'OR':xp()>=500?'ARGENT':'BRONZE';
  let coins=num('psV181Coins',0);
@@ -277,8 +316,8 @@ draw();ensurePlayer();
    const success=w>lastW,st=stage(),lv=world();
    if(success){
      let gain=20+Math.floor(lv/5)*5;coins+=gain;save();pop(`✅ +${gain} 🪙`);
-     if(st===5){boss++;LS.psV181Boss=String(boss);if(boss>=3){boss=0;LS.psV181Boss='0';LS.psV181Cycle=String(cycle()+1);LS.psLevel='1';coins+=75;save();pop('👑 BOSS VAINCU • +75 🪙');setTimeout(()=>location.reload(),1000)}}
-   }else if(st===5){boss=0;LS.psV181Boss='0';pop('💀 Boss : série remise à zéro')}
+     if(st===5){boss=0;LS.psV181Boss='0'}
+   }else if(st===5){boss=0;LS.psV181Boss='0'}
    lastA=a;lastW=w;refresh()
  },500);
 })();
@@ -307,7 +346,7 @@ draw();ensurePlayer();
 (()=>{
  const LS=localStorage,$=id=>document.getElementById(id),q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
  const num=(k,d=0)=>+(LS.getItem(k)||d), put=(k,v)=>LS.setItem(k,v);
- const cycle=()=>Math.max(1,num('psV181Cycle',1)), stage=()=>Math.max(1,num('psLevel',1)), world=()=>((cycle()-1)*5)+stage();
+ const cycle=()=>Math.max(1,num('psV181Cycle',1)), stage=()=>Math.max(1,num('psLevel',1)), world=()=>Math.max(1,num('psWorldLevel',((cycle()-1)*5)+stage()));
  let coins=num('psV181Coins',0);
  let inv={shield:0,focus:0,freeze:0};try{inv={...inv,...JSON.parse(LS.psV19Inv||'{}')}}catch(e){}
  const saveInv=()=>LS.psV19Inv=JSON.stringify(inv);
@@ -791,7 +830,7 @@ body.v22-game main.w{padding-bottom:84px}
  const LS=localStorage,$=id=>document.getElementById(id),q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
  const num=(k,d=0)=>+(LS.getItem(k)||d);
  const pid=()=>LS.psPid||'', pname=()=>LS.psName||'Joueur';
- const world=()=>((Math.max(1,num('psV181Cycle',1))-1)*5)+Math.max(1,num('psLevel',1));
+ const world=()=>Math.max(1,num('psWorldLevel',((Math.max(1,num('psV181Cycle',1))-1)*5)+Math.max(1,num('psLevel',1))));
  const stage=()=>Math.max(1,num('psLevel',1));
  const bestErr=()=>{try{let a=JSON.parse(LS.psLevelBests||'[]').filter(x=>typeof x==='number');return a.length?Math.round(Math.min(...a)*1000):null}catch(e){return null}};
  const rank=x=>x>=5000?'💎 Diamant':x>=2500?'🏆 Platine':x>=1200?'🥇 Or':x>=500?'🥈 Argent':'🥉 Bronze';
@@ -806,7 +845,7 @@ body.v22-game main.w{padding-bottom:84px}
   maxWorld=Math.max(maxWorld,world());LS.psV23MaxWorld=String(maxWorld);
   await rpc('perfect_stop_sync_progress',{
    p_player_id:pid(),p_player_name:pname(),p_xp:num('psXP'),p_coins:num('psV181Coins'),
-   p_world_level:maxWorld,p_max_level:Math.max(stage(),num('psV23MaxStage',1)),
+   p_world_level:maxWorld,p_max_level:maxWorld,
    p_wins:num('psTotalWins'),p_best_streak:num('psBestStreak'),p_best_error_ms:bestErr()
   });
  }
@@ -1530,3 +1569,25 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
 </script>
 
 </body></html>
+<style id="v238-continuous-style">
+#v19BossHud{display:none!important}
+</style>
+<script id="v238-continuous-ui">
+(()=>{
+ const LS=localStorage;
+ const world=()=>Math.max(1,+(LS.psWorldLevel||1));
+ const ver=document.querySelector('.v181ver');
+ if(ver)ver.textContent='VERSION 23.8 • PROGRESSION CONTINUE';
+ function refreshContinuousLabels(){
+   const w=world(), next=Math.ceil(w/5)*5;
+   document.querySelectorAll('#v181Path,.v181roadtop span:first-child').forEach(e=>{
+     const boss=w%5===0;
+     e.textContent=(boss?'👑 BOSS':'🎯 NIVEAU')+' #'+w;
+   });
+   const boss=document.getElementById('v181Boss');
+   if(boss)boss.textContent='Prochain Boss #'+(w%5===0?w:w+(5-w%5));
+ }
+ refreshContinuousLabels();
+ setInterval(refreshContinuousLabels,1200);
+})();
+</script>
