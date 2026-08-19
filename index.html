@@ -503,4 +503,93 @@ draw();ensurePlayer();
 })();
 </script>
 
+
+<style id="v21-style">
+/* PERFECT STOP V21 — live players + challenges + login streak */
+.v21-active{display:inline-flex;align-items:center;gap:7px;background:#092014;border:1px solid #2e8b5744;border-radius:999px;padding:7px 11px;color:#c8f8d8;font:900 12px system-ui}
+.v21-dot{width:8px;height:8px;border-radius:99px;background:#33d17a;box-shadow:0 0 10px #33d17aaa}
+.v21-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#ffffff08;border:1px solid #ffffff10;border-radius:14px;padding:13px;margin:9px 0;text-align:left}
+.v21-row b{display:block}.v21-row small{color:#ffffff66}
+.v21bar{height:7px;background:#ffffff12;border-radius:99px;overflow:hidden;margin-top:7px}.v21bar i{display:block;height:100%;background:linear-gradient(90deg,#ff9b15,#ffd45b)}
+.v21claim{border:0;border-radius:10px;padding:9px 11px;background:#2d7446;color:#fff;font-weight:900}.v21claim[disabled]{opacity:.35}
+.v21days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:12px 0}.v21day{padding:9px 2px;border-radius:11px;background:#ffffff08;font-size:10px}.v21day.on{border:1px solid #ffd45b55;background:#2b1c08}.v21day.done{background:#17351f}
+</style>
+<script id="v21-features">
+(()=>{
+ const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
+ const HD={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'};
+ const LS=localStorage,$=id=>document.getElementById(id),q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ const num=(k,d=0)=>+(LS.getItem(k)||d);
+ let coins=num('psV181Coins',0);
+ const saveCoins=()=>LS.psV181Coins=String(coins);
+ const sid=LS.psPresenceId||(LS.psPresenceId=(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)+Date.now()));
+ async function rpc(name,body){
+   try{let r=await fetch(U+'/rest/v1/rpc/'+name,{method:'POST',headers:HD,body:JSON.stringify(body||{})});if(!r.ok)return null;return await r.json()}catch(e){return null}
+ }
+ // Live presence badge on menu.
+ const card=q('.v181card');
+ if(card && !q('#v21Active')){
+   const d=document.createElement('div');d.style.margin='8px 0';d.innerHTML='<span class="v21-active" id="v21Active"><i class="v21-dot"></i><span id="v21ActiveText">Connexion…</span></span>';
+   const rank=q('.v181rank');rank.insertAdjacentElement('afterend',d)
+ }
+ async function heartbeat(){
+   const c=await rpc('perfect_stop_presence_heartbeat',{p_session_id:sid});
+   if(c!==null){const el=$('v21ActiveText');if(el)el.textContent=`${c} joueur${c>1?'s':''} actif${c>1?'s':''}`}
+ }
+ heartbeat();setInterval(heartbeat,30000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)heartbeat()});
+
+ // Add challenges button beside boosts.
+ const grid=q('.v181grid');
+ if(grid && !q('#v21Challenges')){
+   const b=document.createElement('button');b.id='v21Challenges';b.className='v181btn';b.textContent='⚔️ DÉFIS';grid.appendChild(b)
+ }
+ const today=()=>new Date().toISOString().slice(0,10);
+ let challClaims={};try{challClaims=JSON.parse(LS.psV21Claims||'{}')}catch(e){}
+ const saveClaims=()=>LS.psV21Claims=JSON.stringify(challClaims);
+ function dailyReset(){
+   if(LS.psV21ChallengeDay!==today()){
+     LS.psV21ChallengeDay=today();LS.psV21StartAttempts=String(num('psTotalAttempts'));LS.psV21StartWins=String(num('psTotalWins'));LS.psV21Claims='{}';challClaims={}
+   }
+ } dailyReset();
+ const challengeDefs=()=>[
+   {id:'p5',title:'Jouer 5 parties',v:Math.max(0,num('psTotalAttempts')-num('psV21StartAttempts')),g:5,r:40},
+   {id:'w3',title:'Réussir 3 fois',v:Math.max(0,num('psTotalWins')-num('psV21StartWins')),g:3,r:60},
+   {id:'s3',title:'Atteindre une série x3',v:num('psBestStreak'),g:3,r:75}
+ ];
+ const challengeHTML=()=>challengeDefs().map(x=>{
+   const done=x.v>=x.g,cl=challClaims[x.id];return `<div class="v21-row"><div style="flex:1"><b>${done?'✅':'⚔️'} ${x.title}</b><small>${Math.min(x.v,x.g)}/${x.g}</small><div class=v21bar><i style="width:${Math.min(100,x.v/x.g*100)}%"></i></div></div><button class=v21claim data-v21claim="${x.id}" ${(!done||cl)?'disabled':''}>${cl?'OK':'+'+x.r+' 🪙'}</button></div>`
+ }).join('');
+
+ // 7-day login rewards.
+ function dateDiffDays(a,b){return Math.floor((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000)}
+ let streak=num('psV21LoginStreak',0),last=LS.psV21LastLogin||'';
+ if(last!==today()){
+   streak=last && dateDiffDays(last,today())===1?Math.min(7,streak+1):1;
+   LS.psV21LoginStreak=String(streak);LS.psV21LastLogin=today();
+ }
+ let loginClaimDay=LS.psV21LoginClaimDay||'';
+ const rewards=[20,25,30,40,50,75,100];
+ const loginHTML=()=>{
+   let cells=rewards.map((r,i)=>`<div class="v21day ${i+1<streak?'done':i+1===streak?'on':''}">J${i+1}<br>🪙${r}</div>`).join('');
+   return `<div class="v181item"><strong>📅 CONNEXION 7 JOURS</strong><small>Reviens chaque jour pour augmenter la récompense.</small><div class=v21days>${cells}</div><button id=v21LoginClaim class=v21claim ${loginClaimDay===today()?'disabled':''}>${loginClaimDay===today()?'RÉCUPÉRÉ':'RÉCUPÉRER +'+rewards[streak-1]+' 🪙'}</button></div>`
+ };
+ function openChallenges(){
+   $('v181Title').textContent='⚔️ DÉFIS';
+   $('v181Content').innerHTML=loginHTML()+challengeHTML();
+   $('v181Sheet').classList.add('on');
+   const lc=$('v21LoginClaim');if(lc&&!lc.disabled)lc.onclick=()=>{const gain=rewards[streak-1];coins+=gain;saveCoins();LS.psV21LoginClaimDay=today();loginClaimDay=today();$('v181Coins').textContent=coins;openChallenges()}
+ }
+ q('#v21Challenges')?.addEventListener('click',openChallenges);
+ $('v181Content').addEventListener('click',e=>{
+   const b=e.target.closest('[data-v21claim]');if(!b)return;
+   const d=challengeDefs().find(x=>x.id===b.dataset.v21claim);if(!d||d.v<d.g||challClaims[d.id])return;
+   coins+=d.r;saveCoins();challClaims[d.id]=true;saveClaims();$('v181Coins').textContent=coins;openChallenges()
+ });
+
+ // Version label
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 21 • DÉFIS & JOUEURS LIVE';
+})();
+</script>
+
 </body></html>
