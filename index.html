@@ -1044,4 +1044,139 @@ body.v22-game main.w{
 })();
 </script>
 
+
+<style id="v233-balanced">
+/* PERFECT STOP V23.3 — balanced home layout */
+#v181Home{
+  padding:10px 14px 72px!important;
+  overflow:hidden!important;
+}
+.v181card{
+  height:calc(100dvh - 152px)!important;
+  min-height:540px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  width:min(94vw,430px)!important;
+  margin:0 auto!important;
+}
+.v181logo{
+  font-size:30px!important;
+  line-height:1!important;
+  margin:0!important;
+}
+.v181ver{
+  margin:5px 0 2px!important;
+  font-size:8px!important;
+}
+.v181sub{
+  display:block!important;
+  font-size:12px!important;
+  margin:2px 0 8px!important;
+}
+.v233top{display:flex;flex-direction:column;gap:7px}
+.v181rank,.v181road,#v19Daily{
+  margin:0!important;
+}
+.v181rank{
+  padding:11px 14px!important;
+}
+.v181road{
+  padding:11px 14px!important;
+}
+#v19Daily{
+  padding:10px 13px!important;
+}
+.v233center{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.v181play{
+  margin:0!important;
+  padding:17px!important;
+  font-size:22px!important;
+  border-radius:18px!important;
+}
+#v22Quick{
+  margin:0!important;
+  gap:10px!important;
+}
+.v22quick{
+  padding:13px 8px!important;
+  font-size:13px!important;
+  border-radius:15px!important;
+}
+#v233Info{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.v233card{
+  background:#ffffff08;
+  border:1px solid #ffffff10;
+  border-radius:15px;
+  padding:12px;
+  text-align:left;
+}
+.v233card b{display:block;font-size:14px}
+.v233card small{display:block;color:#ffffff66;margin-top:3px;font-size:10px}
+.v233card .big{font-size:18px;color:#ffd45b;font-weight:900;margin-top:4px}
+#v22Nav{height:68px!important}
+@media(max-height:740px){
+  .v181card{height:calc(100dvh - 144px)!important;min-height:500px!important}
+  .v181logo{font-size:27px!important}
+  .v181sub{font-size:11px!important}
+  .v181rank,.v181road,#v19Daily{padding:9px 11px!important}
+  .v181play{padding:14px!important}
+  .v22quick{padding:10px 6px!important}
+  .v233card{padding:10px!important}
+}
+</style>
+
+<script id="v233-script">
+(()=>{
+ const q=s=>document.querySelector(s);
+ const LS=localStorage;
+ const num=(k,d=0)=>+(LS.getItem(k)||d);
+
+ const card=q('.v181card');
+ if(card){
+   const logo=q('.v181logo');
+   const ver=q('.v181ver');
+   const sub=q('.v181sub');
+   const rank=q('.v181rank');
+   const road=q('.v181road');
+   const daily=q('#v19Daily');
+   const play=q('.v181play');
+   const quick=q('#v22Quick');
+
+   // Group existing blocks into balanced zones.
+   if(!q('.v233top')){
+     const top=document.createElement('div');
+     top.className='v233top';
+     card.insertBefore(top, card.firstChild);
+     [logo,ver,sub,rank,road,daily].forEach(el=>el&&top.appendChild(el));
+   }
+   if(!q('.v233center')){
+     const center=document.createElement('div');
+     center.className='v233center';
+     card.appendChild(center);
+     if(play)center.appendChild(play);
+     if(quick)center.appendChild(quick);
+     const info=document.createElement('div');
+     info.id='v233Info';
+     const best=(()=>{try{let a=JSON.parse(LS.psLevelBests||'[]').filter(x=>typeof x==='number');return a.length?Math.min(...a).toFixed(3)+'s':'—'}catch(e){return '—'}})();
+     const streak=num('psBestStreak');
+     info.innerHTML=`
+       <div class="v233card"><b>🎯 Meilleur écart</b><div class="big">${best}</div><small>Record personnel</small></div>
+       <div class="v233card"><b>🔥 Meilleure série</b><div class="big">x${streak}</div><small>Continue à l'améliorer</small></div>`;
+     center.appendChild(info);
+   }
+ }
+ const ver=q('.v181ver');
+ if(ver)ver.textContent='VERSION 23.3 • MOBILE ÉQUILIBRÉ';
+})();
+</script>
+
 </body></html>
