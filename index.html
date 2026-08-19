@@ -398,4 +398,109 @@ draw();ensurePlayer();
 })();
 </script>
 
+
+<style id="v20-style">
+/* PERFECT STOP V20 — polish + progression */
+.v20-shopitem{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;background:#ffffff08;border:1px solid #ffffff10;border-radius:16px;padding:14px;margin:10px 0}
+.v20-shopitem .ico{font-size:28px}.v20-shopitem b{display:block;font-size:16px}.v20-shopitem small{display:block;color:#ffffff66;margin-top:4px;line-height:1.35}
+.v20-buy{border:0;border-radius:11px;padding:10px 12px;background:#9f5c00;color:#fff;font-weight:900;min-width:74px}.v20-buy[disabled]{opacity:.35}
+#v20Win{position:fixed;inset:0;z-index:9800;background:#030713ee;display:none;place-items:center;padding:22px;color:#fff;font-family:system-ui}#v20Win.on{display:grid}
+.v20wincard{width:min(92vw,400px);background:#0b1026;border:1px solid #ffffff16;border-radius:24px;padding:22px;text-align:center;box-shadow:0 30px 80px #000b}.v20wincard h1{font-size:30px;margin:0 0 8px}.v20big{font-size:44px;font-weight:1000;color:#ffd45b}.v20stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}.v20stats div{background:#ffffff08;border-radius:13px;padding:11px}.v20stats b{display:block;color:#ffd45b;font-size:19px}
+.v20next{width:100%;border:0;border-radius:15px;padding:15px;background:#fff;color:#111;font-weight:1000;font-size:18px}
+#v20Combo{position:fixed;z-index:250;right:14px;top:180px;background:#1a0c05dd;border:1px solid #ff9b3a44;border-radius:999px;padding:7px 11px;color:#fff;font:900 12px system-ui;display:none}
+#v20Combo.on{display:block}.v20-mult{color:#ffb23e}
+.v20-rewardcard{background:linear-gradient(135deg,#2b1707,#101329);border:1px solid #ffbd4a33;border-radius:15px;padding:13px;margin:9px 0;text-align:left}
+</style>
+<div id="v20Combo">🔥 Série <span id="v20ComboVal">0</span> • <span class="v20-mult" id="v20Mult">x1</span></div>
+<div id="v20Win"><div class="v20wincard">
+ <h1 id="v20WinTitle">🏆 NIVEAU RÉUSSI</h1>
+ <div class="v20big" id="v20WinScore">+0 🪙</div>
+ <div class="v20stats"><div><b id="v20WinXP">+0</b>XP</div><div><b id="v20WinCombo">x1</b>MULTI</div></div>
+ <p id="v20WinText">Continue le parcours.</p>
+ <button class="v20next" id="v20Next">CONTINUER</button>
+</div></div>
+
+<script id="v20-features">
+(()=>{
+ const LS=localStorage,$=id=>document.getElementById(id),q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ const num=(k,d=0)=>+(LS.getItem(k)||d),put=(k,v)=>LS.setItem(k,v);
+ let coins=num('psV181Coins',0), combo=num('psV20Combo',0), bestCombo=num('psV20BestCombo',0);
+ const saveCoins=()=>LS.psV181Coins=String(coins);
+ const saveCombo=()=>{LS.psV20Combo=String(combo);LS.psV20BestCombo=String(bestCombo)};
+ const stage=()=>Math.max(1,num('psLevel',1)), cycle=()=>Math.max(1,num('psV181Cycle',1)), world=()=>((cycle()-1)*5)+stage();
+ const isBoss=()=>stage()===5;
+ const multiplier=()=>combo>=10?4:combo>=6?3:combo>=3?2:1;
+ const refreshCombo=()=>{
+   const hud=$('v20Combo');if(combo>0){hud.classList.add('on');$('v20ComboVal').textContent=combo;$('v20Mult').textContent='x'+multiplier()}else hud.classList.remove('on')
+ };
+ refreshCombo();
+
+ // Replace the old boost shop rendering with a clean version.
+ const oldBoost=q('#v19BoostBtn');
+ if(oldBoost){
+   oldBoost.onclick=()=>{
+     let inv={shield:0,focus:0,freeze:0};try{inv={...inv,...JSON.parse(LS.psV19Inv||'{}')}}catch(e){}
+     $('v181Title').textContent='🛍️ BOOSTS';
+     $('v181Content').innerHTML=`
+       <div class="v20-shopitem"><span class=ico>🛡️</span><div><b>Bouclier Boss</b><small>Protège une tentative ratée pendant un Boss. Possédé : ${inv.shield}</small></div><button class=v20-buy data-v20buy=shield ${coins<75?'disabled':''}>75 🪙</button></div>
+       <div class="v20-shopitem"><span class=ico>👁️</span><div><b>Focus</b><small>Annule le modificateur difficile du prochain essai. Possédé : ${inv.focus}</small></div><button class=v20-buy data-v20buy=focus ${coins<50?'disabled':''}>50 🪙</button></div>
+       <div class="v20-shopitem"><span class=ico>❄️</span><div><b>Gel</b><small>Affiche normalement le chrono pendant le prochain essai. Possédé : ${inv.freeze}</small></div><button class=v20-buy data-v20buy=freeze ${coins<40?'disabled':''}>40 🪙</button></div>`;
+     $('v181Sheet').classList.add('on')
+   }
+ }
+ $('v181Content').addEventListener('click',e=>{
+   const b=e.target.closest('[data-v20buy]');if(!b)return;
+   let inv={shield:0,focus:0,freeze:0};try{inv={...inv,...JSON.parse(LS.psV19Inv||'{}')}}catch(e){}
+   const cost={shield:75,focus:50,freeze:40}[b.dataset.v20buy];
+   if(coins<cost)return;coins-=cost;inv[b.dataset.v20buy]++;LS.psV19Inv=JSON.stringify(inv);saveCoins();$('v181Coins').textContent=coins;oldBoost?.click()
+ });
+
+ // Add combo explanation in rewards.
+ qa('[data-v181="rewards"]').forEach(btn=>btn.addEventListener('click',()=>{
+   setTimeout(()=>{
+     const c=$('v181Content');if(!c)return;
+     c.insertAdjacentHTML('afterbegin',`<div class="v20-rewardcard"><b>🔥 MULTIPLICATEUR DE SÉRIE</b><div style="margin-top:6px">x1 : 0–2 réussites • x2 : 3–5 • x3 : 6–9 • x4 : 10+</div><small style="color:#ffffff66">Une erreur remet la série à zéro.</small></div>`)
+   },0)
+ }));
+
+ const showWin=(boss,reward,xpGain)=>{
+   $('v20WinTitle').textContent=boss?'👑 BOSS VAINCU':'🏆 NIVEAU RÉUSSI';
+   $('v20WinScore').textContent='+'+reward+' 🪙';
+   $('v20WinXP').textContent='+'+xpGain;
+   $('v20WinCombo').textContent='x'+multiplier();
+   $('v20WinText').textContent=boss?'Nouveau cycle débloqué. La difficulté augmente.':'Continue vers le prochain parcours.';
+   $('v20Win').classList.add('on')
+ };
+ $('v20Next').onclick=()=>$('v20Win').classList.remove('on');
+
+ // Watch only persisted counters: stable and cheap.
+ let lastA=num('psTotalAttempts'),lastW=num('psTotalWins'),lastLevel=stage(),lastCycle=cycle();
+ setInterval(()=>{
+   const a=num('psTotalAttempts'),w=num('psTotalWins'),st=stage(),cy=cycle();
+   if(a!==lastA){
+     if(w>lastW){
+       combo++;bestCombo=Math.max(bestCombo,combo);saveCombo();
+       const mult=multiplier();
+       const base=isBoss()?30:10;
+       const bonus=base*(mult-1);
+       if(bonus>0){coins+=bonus;saveCoins();$('v181Coins').textContent=coins}
+     }else{combo=0;saveCombo()}
+     refreshCombo();lastA=a;lastW=w
+   }
+   // Show a win card when the persisted progression actually advances.
+   if(st!==lastLevel || cy!==lastCycle){
+     const bossAdvanced=cy!==lastCycle;
+     const mult=multiplier(),reward=(bossAdvanced?100:25)*mult,xpGain=(bossAdvanced?60:20)*mult;
+     coins+=reward;saveCoins();$('v181Coins').textContent=coins;
+     LS.psXP=String(num('psXP')+xpGain);
+     showWin(bossAdvanced,reward,xpGain);
+     lastLevel=st;lastCycle=cy
+   }
+ },500);
+
+ // Version label
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 20 • COMBOS & VICTOIRES';
+})();
+</script>
+
 </body></html>
