@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#081126">
-<title>Perfect Stop V23.9</title>
+<title>Perfect Stop V24</title>
 <style>
 *{box-sizing:border-box;touch-action:manipulation}
 html,body{margin:0;height:100%;overflow:hidden}
@@ -1598,6 +1598,58 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
 
  const ver=q('.v181ver');
  if(ver)ver.textContent='VERSION 23.7 • CROIX CORRIGÉE';
+})();
+</script>
+
+
+<style id="v24-duels-style">
+.v24stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.v24stat{background:#ffffff08;border:1px solid #ffffff12;border-radius:14px;padding:11px 4px;text-align:center}
+.v24stat b{display:block;font-size:20px;color:#ffd45b}.v24stat small{font-size:9px;color:#ffffff70}
+.v24history{margin-top:8px}.v24match{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #ffffff0b}
+.v24match:last-child{border-bottom:0}.v24match small{color:#ffffff70}
+.v24win{color:#65df91}.v24loss{color:#ff7485}.v24draw{color:#ffd45b}
+.v24empty{padding:14px;text-align:center;color:#ffffff65}
+#v24Rematch{border:0;border-radius:12px;padding:11px 14px;background:#7d4600;color:#fff;font-weight:900;margin-top:10px;width:100%}
+</style>
+<script id="v24-duels">
+(()=>{
+ const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
+ const HD={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json'};
+ const $=id=>document.getElementById(id),qa=s=>[...document.querySelectorAll(s)];
+ const pid=()=>localStorage.psPid||'',pname=()=>localStorage.psName||'Joueur';
+ const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ async function get(path){try{let r=await fetch(U+'/rest/v1/'+path,{headers:HD});return r.ok?await r.json():[]}catch(e){return[]}}
+ async function rpc(name,body){try{let r=await fetch(U+'/rest/v1/rpc/'+name,{method:'POST',headers:HD,body:JSON.stringify(body)});return r.ok?await r.json():null}catch(e){return null}}
+ function resultOf(d){if(d.winner_id==='draw')return'draw';return d.winner_id===pid()?'win':'loss'}
+ function opponentName(d){return d.challenger_id===pid()?d.opponent_name:d.challenger_name}
+ function myErr(d){return d.challenger_id===pid()?d.challenger_error_ms:d.opponent_error_ms}
+ function oppErr(d){return d.challenger_id===pid()?d.opponent_error_ms:d.challenger_error_ms}
+ async function renderMyDuels(){
+  const c=$('v23ArenaContent');if(!c)return;c.innerHTML='<div class=v23box>Chargement…</div>';
+  const me=encodeURIComponent(pid());
+  const rows=await get(`perfect_stop_duels?select=*&or=(challenger_id.eq.${me},opponent_id.eq.${me})&status=eq.finished&order=updated_at.desc&limit=30`);
+  let wins=0,losses=0,draws=0;rows.forEach(d=>{let r=resultOf(d);if(r==='win')wins++;else if(r==='loss')losses++;else draws++});
+  const total=wins+losses+draws,rate=total?Math.round(wins/total*100):0;
+  c.innerHTML=`<div class=v23box><b>⚔️ TON PROFIL DUEL</b><small style="display:block;color:#ffffff66;margin-top:4px">Même cible pour les deux joueurs. Le plus petit écart gagne.</small>
+  <div class=v24stats><div class=v24stat><b>${wins}</b><small>VICTOIRES</small></div><div class=v24stat><b>${losses}</b><small>DÉFAITES</small></div><div class=v24stat><b>${rate}%</b><small>TAUX DE VICTOIRE</small></div></div></div>
+  <div class=v23box><b>🕘 DERNIERS DUELS</b><div class=v24history>${rows.length?rows.slice(0,10).map(d=>{let r=resultOf(d),cl=r==='win'?'v24win':r==='loss'?'v24loss':'v24draw',lab=r==='win'?'🏆 GAGNÉ':r==='loss'?'❌ PERDU':'🤝 ÉGALITÉ';return `<div class=v24match><div><b>${esc(opponentName(d))}</b><small>${((myErr(d)||0)/1000).toFixed(3)}s vs ${((oppErr(d)||0)/1000).toFixed(3)}s</small></div><b class=${cl}>${lab}</b></div>`}).join(''):'<div class=v24empty>Aucun duel terminé pour le moment.</div>'}</div></div>`;
+ }
+ const tabs=document.querySelector('.v23tabs');
+ if(tabs&&!document.querySelector('[data-v23tab="myduels"]')){
+  const b=document.createElement('button');b.className='v23tab';b.dataset.v23tab='myduels';b.textContent='⚔️ Mes duels';
+  const anchor=document.querySelector('[data-v23tab="wins"]');tabs.insertBefore(b,anchor||null);
+  b.onclick=()=>{qa('[data-v23tab]').forEach(x=>x.classList.toggle('on',x===b));renderMyDuels()}
+ }
+ const arena=$('v23ArenaContent');
+ if(arena)new MutationObserver(()=>arena.querySelectorAll('[data-duel]').forEach(b=>{if(!b.dataset.v24){b.dataset.v24='1';b.textContent='⚔️ DÉFIER'}})).observe(arena,{childList:true,subtree:true});
+ const status=$('v23DuelStatus');
+ if(status)new MutationObserver(()=>{
+  if(!/GAGNÉ|perdu|Égalité/i.test(status.textContent)||$('v24Rematch'))return;
+  const b=document.createElement('button');b.id='v24Rematch';b.textContent='🔁 REVANCHE';status.insertAdjacentElement('afterend',b);
+  b.onclick=async()=>{if(typeof duel==='undefined'||!duel)return;const oid=duel.challenger_id===pid()?duel.opponent_id:duel.challenger_id,on=duel.challenger_id===pid()?duel.opponent_name:duel.challenger_name;b.disabled=true;const id=await rpc('perfect_stop_create_duel',{p_challenger_id:pid(),p_challenger_name:pname(),p_opponent_id:oid,p_opponent_name:on});if(id){const rows=await get('perfect_stop_duels?select=*&id=eq.'+id);if(rows[0]&&typeof openDuel==='function'){b.remove();$('v23DuelBtn').disabled=false;openDuel(rows[0],on);return}}b.disabled=false}
+ },{childList:true,subtree:true,characterData:true});
+ const ver=document.querySelector('.v181ver');if(ver)ver.textContent='VERSION 24 • DUELS+';
 })();
 </script>
 
