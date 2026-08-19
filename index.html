@@ -1925,6 +1925,25 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
 })();
 </script>
 
+
+<style id="v246-three-actions">
+#v22Quick{display:none!important}
+.v181grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin:6px 0!important}
+.v181grid .v181btn{display:none!important}
+#v244SuddenBtn,.v181grid [data-v181="missions"],#v246Challenges{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;width:auto!important;min-height:48px!important;padding:9px 3px!important;margin:0!important;border-radius:14px!important;font-size:11px!important;white-space:nowrap!important}
+@media(max-width:360px){#v244SuddenBtn,.v181grid [data-v181="missions"],#v246Challenges{font-size:9px!important;padding:8px 1px!important}}
+</style>
+<script id="v246-layout">
+(()=>{
+ const q=s=>document.querySelector(s),grid=q('.v181grid'); if(!grid)return;
+ const sudden=q('#v244SuddenBtn'),missions=q('[data-v181="missions"]');
+ let challenges=q('#v246Challenges');
+ if(!challenges){challenges=document.createElement('button');challenges.id='v246Challenges';challenges.className='v181btn';challenges.textContent='⚔️ DÉFIS';challenges.onclick=()=>q('#v21Challenges')?.click();}
+ if(sudden)grid.appendChild(sudden); if(missions)grid.appendChild(missions); grid.appendChild(challenges);
+ const play=q('.v181play'); if(play)play.insertAdjacentElement('afterend',grid);
+ const v=q('.v181ver'); if(v)v.textContent='VERSION 24.6 • ACCUEIL COMPACT';
+})();
+</script>
 </body></html>
 <style id="v238-continuous-style">
 #v19BossHud{display:none!important}
