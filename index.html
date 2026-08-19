@@ -1292,4 +1292,98 @@ body.v22-game main.w{
 })();
 </script>
 
+
+<style id="v235-challenge-exit-fix">
+/* V23.5 — fix impossible-to-close challenge screen */
+#v235ChallengeClose{
+ position:fixed;
+ top:calc(env(safe-area-inset-top) + 14px);
+ right:16px;
+ z-index:200000;
+ width:44px;
+ height:44px;
+ border:1px solid #ffffff18;
+ border-radius:50%;
+ background:#0d1328ee;
+ color:#fff;
+ font-size:24px;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ box-shadow:0 8px 24px #0008;
+}
+body.v235-challenge-open #v235ChallengeClose{display:flex}
+</style>
+
+<button id="v235ChallengeClose" aria-label="Fermer">×</button>
+
+<script id="v235-challenge-fix">
+(()=>{
+ const q=s=>document.querySelector(s), qa=s=>[...document.querySelectorAll(s)];
+ const closeBtn=document.getElementById('v235ChallengeClose');
+
+ function challengeVisible(){
+   const txt=(document.body.innerText||'').toLowerCase();
+   return txt.includes('connexion 7 jours') && txt.includes('jouer 5 parties');
+ }
+
+ function closeChallenge(){
+   // Try known sheets / overlays first
+   ['v181Sheet','v22Panel','v234Profile','v234Boosts','v234Rewards'].forEach(id=>{
+     const e=document.getElementById(id);
+     if(e){ e.classList.remove('on'); e.style.display=''; }
+   });
+
+   // Hide any fullscreen overlay that contains the challenges content
+   qa('section,div').forEach(e=>{
+     const t=(e.innerText||'').toLowerCase();
+     const cs=getComputedStyle(e);
+     if(t.includes('connexion 7 jours') && t.includes('jouer 5 parties') &&
+        (cs.position==='fixed' || e.classList.contains('on'))){
+       e.classList.remove('on','show');
+       if(cs.position==='fixed') e.style.display='none';
+     }
+   });
+
+   document.body.classList.remove('v235-challenge-open');
+
+   // Return to Home view
+   const home=document.getElementById('v181Home');
+   if(home){home.classList.remove('hide');home.style.display='';}
+   document.body.classList.remove('v22-game');
+
+   qa('[data-v22]').forEach(b=>b.classList.toggle('on',b.dataset.v22==='home'));
+ }
+
+ closeBtn.onclick=closeChallenge;
+
+ // Detect the challenge view and show a guaranteed close button.
+ const observer=new MutationObserver(()=>{
+   const open=challengeVisible();
+   document.body.classList.toggle('v235-challenge-open',open);
+ });
+ observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+
+ // Bottom nav must always escape challenge view.
+ qa('[data-v22]').forEach(b=>{
+   const original=b.onclick;
+   b.addEventListener('click',()=>{
+     if(document.body.classList.contains('v235-challenge-open')){
+       document.body.classList.remove('v235-challenge-open');
+       qa('div,section').forEach(e=>{
+         const t=(e.innerText||'').toLowerCase();
+         if(t.includes('connexion 7 jours') && t.includes('jouer 5 parties')){
+           e.classList.remove('on','show');
+           if(getComputedStyle(e).position==='fixed') e.style.display='none';
+         }
+       });
+     }
+   },true);
+ });
+
+ const ver=q('.v181ver');
+ if(ver)ver.textContent='VERSION 23.5 • NAVIGATION CORRIGÉE';
+})();
+</script>
+
 </body></html>
