@@ -432,4 +432,133 @@ body.v16-diamond .btn{box-shadow:0 0 25px #9ce8ff44}
 })();
 </script>
 
+
+<style id="v17-style">
+#v17Season{margin:8px 0 0;font-size:12px;color:#ffffff8a;letter-spacing:.8px}
+#v17Road{margin-top:12px;background:#ffffff06;border:1px solid #ffffff0c;border-radius:16px;padding:12px;text-align:left}
+#v17RoadTop{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+#v17RoadTop b{color:#e6a62c}
+.v17bar{height:8px;background:#ffffff12;border-radius:99px;overflow:hidden;margin-top:8px}
+.v17bar i{display:block;height:100%;background:linear-gradient(90deg,#e7790b,#ffd15a);border-radius:99px}
+.v17-pop{position:fixed;z-index:9999;left:50%;top:44%;transform:translate(-50%,-50%) scale(.7);padding:18px 24px;border-radius:20px;background:#080d25eF;border:1px solid #ffffff20;color:#fff;font-size:25px;font-weight:1000;opacity:0;pointer-events:none;text-align:center}
+.v17-pop.go{animation:v17pop .85s ease}
+@keyframes v17pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-58%) scale(.95)}}
+.v17-card{background:#ffffff07;border:1px solid #ffffff10;border-radius:15px;padding:13px;margin:9px 0;text-align:left}
+.v17-card strong{display:block;font-size:16px}.v17-card small{color:#ffffff77}
+.v17-pill{display:inline-block;margin-top:7px;padding:5px 9px;border-radius:999px;background:#ffffff0d;font-size:11px}
+</style>
+<script id="v17-features">
+(()=>{
+ const LS=localStorage,q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ const n=(k,d=0)=>+(LS.getItem(k)||d);
+ const set=(k,v)=>LS.setItem(k,v);
+ const cycle=()=>Math.max(1,n('psV17Cycle',1));
+ const stage=()=>Math.max(1,n('psLevel',1));
+ const worldLevel=()=>((cycle()-1)*5)+stage();
+ const rank=()=>{
+   const x=n('psXP');
+   if(x>=10000)return 'MAÎTRE';
+   if(x>=5000)return 'DIAMANT';
+   if(x>=2500)return 'PLATINE';
+   if(x>=1200)return 'OR';
+   if(x>=500)return 'ARGENT';
+   return 'BRONZE';
+ };
+ const challengeNames=['PRÉCISION','DISPARITION','MÉMOIRE','RANDOM','BOSS'];
+ const targetFor=lv=>Math.max(.045,.20-(Math.floor((lv-1)/5)*.012));
+ const winsNeeded=lv=>lv%5===0?3:1;
+ const currentName=()=>challengeNames[(stage()-1)%5];
+ const pop=(txt)=>{
+   let p=q('#v17Pop');if(!p){p=document.createElement('div');p.id='v17Pop';p.className='v17-pop';document.body.appendChild(p)}
+   p.innerHTML=txt;p.classList.remove('go');void p.offsetWidth;p.classList.add('go')
+ };
+ // Add season/road information to the home.
+ const logo=q('.v15logo');
+ if(logo && !q('#v17Season')) logo.insertAdjacentHTML('afterend',`<div id="v17Season">SAISON 1 • PARCOURS SANS FIN</div>`);
+ const home=q('#v15Home');
+ if(home && !q('#v17Road')){
+   const menu=home.querySelector('.v15menu');
+   const road=document.createElement('div');road.id='v17Road';
+   road.innerHTML='<div id="v17RoadTop"></div><div class="v17bar"><i id="v17RoadBar"></i></div>';
+   (menu||home).insertAdjacentElement(menu?'beforebegin':'beforeend',road);
+ }
+ const updateRoad=()=>{
+   const lv=worldLevel(),st=stage(),cy=cycle();
+   const rt=q('#v17RoadTop'),rb=q('#v17RoadBar');
+   if(rt)rt.innerHTML=`<span>🛣️ Parcours <b>#${lv}</b> • ${currentName()}</span><span>${rank()}</span>`;
+   if(rb)rb.style.width=((st-1)/5*100)+'%';
+   const lg=q('#v15League');if(lg)lg.textContent=rank();
+ };
+ updateRoad();
+
+ // Replace misleading fixed level-5 message with current objective.
+ const updateObjective=()=>{
+   const el=q('#lockMsg'); if(!el)return;
+   const lv=worldLevel(),goal=winsNeeded(lv),tol=targetFor(lv);
+   el.textContent=stage()===5?`👑 BOSS : ${goal} réussites à ≤ ${tol.toFixed(3)}s`:`Parcours #${lv} • objectif ≤ ${tol.toFixed(3)}s`;
+ };
+ updateObjective();
+
+ // Upgrade level sheet to explain endless loop.
+ const oldButtons=qa('[data-v15="levels"]');
+ oldButtons.forEach(btn=>btn.addEventListener('click',()=>{
+   setTimeout(()=>{
+     const c=q('#v15Content');if(!c)return;
+     c.insertAdjacentHTML('beforeend',`<div class="v17-card"><strong>♾️ APRÈS LE NIVEAU 5</strong><small>Le parcours recommence avec des objectifs plus difficiles. Les niveaux 10, 15, 20… sont des BOSS. Ta progression n'a plus de fin.</small><span class="v17-pill">Parcours actuel #${worldLevel()}</span></div>`)
+   },0)
+ }));
+
+ // New reward ladder.
+ const rewardBtn=qa('[data-v15="rewards"]');
+ rewardBtn.forEach(btn=>btn.addEventListener('click',()=>{
+   setTimeout(()=>{
+    const c=q('#v15Content');if(!c)return;
+    c.insertAdjacentHTML('beforeend',`
+      <div class="v17-card"><strong>🎁 PALIERS DE SAISON</strong><small>50 XP : +25 🪙 • 250 XP : +50 🪙 • 500 XP : Argent • 1200 XP : Or • 2500 XP : Platine • 5000 XP : Diamant • 10000 XP : Maître.</small></div>`)
+   },0)
+ }));
+
+ // Daily challenge, persisted by local date.
+ const day=new Date().toISOString().slice(0,10);
+ if(LS.psV17Day!==day){LS.psV17Day=day;LS.psV17DailyStart=n('psTotalAttempts');LS.psV17DailyClaim='0'}
+ const dailyProgress=()=>Math.max(0,n('psTotalAttempts')-n('psV17DailyStart'));
+ qa('[data-v15="missions"]').forEach(btn=>btn.addEventListener('click',()=>{
+  setTimeout(()=>{
+   const c=q('#v15Content');if(!c)return;
+   const p=dailyProgress(),done=p>=5,claimed=LS.psV17DailyClaim==='1';
+   c.insertAdjacentHTML('afterbegin',`<div class="v16-mission"><div class="v16-mission-head"><span>📅 Défi du jour : 5 parties</span><b>${Math.min(5,p)}/5</b></div><div class="v16-progress"><i style="width:${Math.min(100,p/5*100)}%"></i></div><button id="v17DailyClaim" class="v16-claim" ${(!done||claimed)?'disabled':''}>${claimed?'RÉCUPÉRÉ':'RÉCUPÉRER +75 🪙'}</button></div>`);
+   q('#v17DailyClaim')?.addEventListener('click',()=>{
+     let m={coins:0};try{m={...m,...JSON.parse(LS.perfectStopV14||'{}')}}catch(e){}
+     m.coins=(m.coins||0)+75;LS.perfectStopV14=JSON.stringify(m);LS.psV17DailyClaim='1';pop('🎁 +75 🪙');q('#v15Close')?.click()
+   })
+  },0)
+ }));
+
+ // Observe results to add spectacle and detect successful progression.
+ let lastAttempts=n('psTotalAttempts'),lastWins=n('psTotalWins'),cycleWins=n('psV17CycleWins');
+ setInterval(()=>{
+   const a=n('psTotalAttempts'),w=n('psTotalWins');
+   if(a>lastAttempts){
+     if(w>lastWins){
+       cycleWins++;
+       set('psV17CycleWins',cycleWins);
+       pop(cycleWins>=winsNeeded(worldLevel())?'🏆 NIVEAU VALIDÉ !':'🔥 PERFECT !');
+       if(cycleWins>=winsNeeded(worldLevel())){
+         cycleWins=0;set('psV17CycleWins',0);
+         // Only extend beyond level 5; existing game still controls 1→5.
+         if(stage()>=5){
+           set('psV17Cycle',cycle()+1);
+           set('psLevel',1);
+           setTimeout(()=>{pop(`🚀 PARCOURS #${worldLevel()}`);updateRoad();updateObjective()},900);
+         }
+       }
+     } else {
+       pop('⚡ ENCORE !');
+     }
+     lastAttempts=a;lastWins=w;updateRoad();updateObjective();
+   }
+ },350);
+})();
+</script>
+
 </body></html>
