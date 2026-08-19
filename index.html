@@ -592,4 +592,115 @@ draw();ensurePlayer();
 })();
 </script>
 
+
+<style id="v22-style">
+/* PERFECT STOP V22 — mobile app navigation */
+#v22Nav{position:fixed;left:0;right:0;bottom:0;z-index:12000;height:74px;background:#0b0d14ee;border-top:1px solid #ffffff12;display:grid;grid-template-columns:repeat(4,1fr);backdrop-filter:blur(14px);font-family:system-ui}
+.v22navbtn{border:0;background:transparent;color:#ffffff75;font-size:11px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.v22navbtn span{font-size:21px}.v22navbtn.on{color:#fff}
+#v181Home{padding-bottom:88px!important;overflow-y:auto!important}
+.v181card{padding-bottom:10px}
+.v181grid{grid-template-columns:1fr 1fr!important}
+.v181grid .v181btn{min-height:62px}
+#v22Quick{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.v22quick{border:0;border-radius:16px;padding:14px;background:#172039;color:#fff;font-weight:900}
+#v22Panel{position:fixed;inset:0 0 74px 0;z-index:11000;background:radial-gradient(circle at 50% 0,#111b48,#030611 60%);display:none;overflow:auto;padding:18px 18px 26px;color:#fff;font-family:system-ui}
+#v22Panel.on{display:block}.v22head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.v22head h2{margin:0}.v22close{border:0;border-radius:999px;background:#ffffff0d;color:#fff;padding:8px 10px}
+.v22card{background:#ffffff08;border:1px solid #ffffff10;border-radius:16px;padding:14px;margin:10px 0}.v22card b{display:block}.v22card small{color:#ffffff66}
+.v22leader{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #ffffff0a}.v22leader:last-child{border-bottom:0}
+body.v22-game #v181Home{display:none!important}
+body.v22-game #v22Nav{display:grid}
+body.v22-game main.w{padding-bottom:84px}
+@media(max-height:760px){#v22Nav{height:66px}#v22Panel{bottom:66px}}
+</style>
+
+<div id="v22Panel">
+ <div class="v22head"><h2 id="v22Title">Accueil</h2><button class="v22close" id="v22Close">✕</button></div>
+ <div id="v22Content"></div>
+</div>
+<nav id="v22Nav">
+ <button class="v22navbtn on" data-v22="home"><span>🏠</span>Accueil</button>
+ <button class="v22navbtn" data-v22="play"><span>▶️</span>Jouer</button>
+ <button class="v22navbtn" data-v22="rank"><span>🌍</span>Classement</button>
+ <button class="v22navbtn" data-v22="profile"><span>👤</span>Profil</button>
+</nav>
+
+<script id="v22-features">
+(()=>{
+ const LS=localStorage,$=id=>document.getElementById(id),q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ const num=(k,d=0)=>+(LS.getItem(k)||d);
+ const home=$('v181Home'),panel=$('v22Panel'),content=$('v22Content'),title=$('v22Title');
+ const navs=qa('[data-v22]');
+ const setNav=id=>navs.forEach(b=>b.classList.toggle('on',b.dataset.v22===id));
+ const showPanel=(name,html)=>{title.textContent=name;content.innerHTML=html;panel.classList.add('on')};
+ const hidePanel=()=>panel.classList.remove('on');
+ $('v22Close').onclick=hidePanel;
+
+ // Make the old home less tall: hide the six large utility buttons and replace them with two compact shortcuts.
+ const grid=q('.v181grid');
+ if(grid){
+   qa('.v181grid .v181btn').forEach(b=>b.style.display='none');
+   if(!q('#v22Quick')){
+     const quick=document.createElement('div');quick.id='v22Quick';
+     quick.innerHTML='<button class="v22quick" id="v22Missions">🎯 Missions</button><button class="v22quick" id="v22Challenges">⚔️ Défis</button>';
+     grid.insertAdjacentElement('beforebegin',quick)
+   }
+ }
+ q('#v22Missions')?.addEventListener('click',()=>q('[data-v181="missions"]')?.click());
+ q('#v22Challenges')?.addEventListener('click',()=>q('#v21Challenges')?.click());
+
+ function openHome(){
+   hidePanel();home?.classList.remove('hide');document.body.classList.remove('v22-game');setNav('home')
+ }
+ function openPlay(){
+   hidePanel();home?.classList.add('hide');document.body.classList.add('v22-game');setNav('play')
+ }
+ async function openRank(){
+   setNav('rank');
+   let rows='<div class="v22card"><b>Chargement du classement…</b></div>';
+   showPanel('🌍 Classement',rows);
+   try{
+     const U='https://xwwmydnfjvxwojtvvfmf.supabase.co',K='sb_publishable_0RmzePJKk7WBmNkbb7g9cg_3emoGdWF';
+     const r=await fetch(U+'/rest/v1/perfect_stop_scores?select=player_name,error_ms,level&error_ms=lte.200&order=error_ms.asc&limit=50',{headers:{apikey:K,Authorization:'Bearer '+K}});
+     const a=await r.json(),seen=new Set(),u=[];
+     for(const x of a){let key=(x.player_name||'').toLowerCase();if(seen.has(key))continue;seen.add(key);u.push(x)}
+     content.innerHTML=`<div class="v22card"><b>🏆 Top mondial</b><small>Meilleur écart enregistré, tous niveaux confondus.</small></div>`+
+     (u.slice(0,10).map((x,i)=>`<div class="v22leader"><span>${i<3?['🥇','🥈','🥉'][i]:i+1+'.'} ${x.player_name}</span><b>${(x.error_ms/1000).toFixed(3)}s</b></div>`).join('')||'<div class=v22card>Aucun score.</div>')
+   }catch(e){content.innerHTML='<div class=v22card>Classement indisponible.</div>'}
+ }
+ function openProfile(){
+   setNav('profile');
+   const a=num('psTotalAttempts'),w=num('psTotalWins'),xp=num('psXP'),st=num('psBestStreak'),coins=num('psV181Coins');
+   const name=LS.psName||'Joueur';
+   showPanel('👤 Profil',`
+    <div class="v22card"><b>${name}</b><small>Perfect Stop</small></div>
+    <div class="v22card"><b>${xp} XP</b><small>Progression</small></div>
+    <div class="v22card"><b>${coins} 🪙</b><small>Pièces disponibles</small></div>
+    <div class="v22card"><b>${a?Math.round(w/a*100):0}%</b><small>Taux de réussite • ${w}/${a}</small></div>
+    <div class="v22card"><b>🔥 x${st}</b><small>Meilleure série</small></div>
+    <div id="v22ProfileButtons"></div>
+   `);
+   const btns=$('v22ProfileButtons');
+   btns.innerHTML='<button class="v22quick" id="v22Rewards">🏆 Récompenses</button> <button class="v22quick" id="v22Boosts">🛍️ Boosts</button>';
+   q('#v22Rewards').onclick=()=>q('[data-v181="rewards"]')?.click();
+   q('#v22Boosts').onclick=()=>q('#v19BoostBtn')?.click()
+ }
+ navs.forEach(b=>b.onclick=()=>{
+   const id=b.dataset.v22;
+   if(id==='home')openHome();
+   if(id==='play')openPlay();
+   if(id==='rank')openRank();
+   if(id==='profile')openProfile()
+ });
+
+ // Existing menu button in game now returns to compact Home.
+ const mb=q('#v16MenuBtn');if(mb)mb.onclick=openHome;
+
+ // Main big play on home opens game and selects nav.
+ const p=q('#v181Play');if(p)p.onclick=openPlay;
+
+ const ver=q('.v181ver');if(ver)ver.textContent='VERSION 22 • NAVIGATION MOBILE';
+})();
+</script>
+
 </body></html>
