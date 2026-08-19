@@ -84,6 +84,32 @@ body{background:radial-gradient(circle at 50% 7%,#263763,#080a13 62%);color:#fff
 })();
 </script>
 
+
+<style id="v259-rare-shop">
+.v259-galaxy{color:#c786ff;text-shadow:0 0 8px #783cff,0 0 15px #35cfff}
+.v259-inferno{color:#ff714d;text-shadow:0 0 8px #ff2600,0 0 15px #ff8a00}
+body.v258theme-galaxy #timer{color:#d092ff!important;text-shadow:0 0 12px #853cff,0 0 28px #21bfff,0 0 42px #672cff}
+body.v258theme-inferno #timer{color:#ff7858!important;text-shadow:0 0 12px #ff2600,0 0 28px #ff8b00}
+body.v258frame-champion #v234Profile .v234panel{border:2px solid #ffcf3d!important;box-shadow:0 0 18px #ffb30066,0 0 38px #ff7a0033}
+body.v258frame-top1 #v234Profile .v234panel{border:3px solid #ffe25b!important;box-shadow:0 0 22px #ffe25b88,0 0 48px #ff9d0044}
+</style>
+<script id="v259-top1-achievement">
+(()=>{
+ const LS=localStorage;
+ // Watch ranking panels: if the logged-in player is rendered first, permanently unlock TOP 1 frame.
+ const me=()=>String(LS.psName||'').trim().toLowerCase();
+ function check(){
+   const body=document.getElementById('v256RankBody');
+   if(!body||!me())return;
+   const first=body.querySelector('.v22leader');
+   if(first && (first.innerText||'').toLowerCase().includes(me())){
+     LS.setItem('psAchievementTop1','1');
+   }
+ }
+ setInterval(check,700);
+})();
+</script>
+
 </head><body>
 <main class="w" id="app">
 <div class="top"><b>PERFECT STOP</b><span class="rankchip" id="rankChip">BRONZE • 0 XP</span><span><button class="iconbtn" id="soundBtn">🔊</button> <button class="iconbtn" id="statsBtn">📊</button> 🏆 <b id="points">0</b></span></div>
@@ -2239,23 +2265,32 @@ body.v258frame-legend #v234Profile .v234panel{border:2px solid #b95cff!important
    ['classic','⚪','Classique','Style d’origine',0,''],
    ['neon','💜','Néon','Chrono violet lumineux',300,'v258-neon'],
    ['ice','🧊','Glace','Chrono bleu glacé',400,'v258-ice'],
-   ['gold','👑','Or','Chrono doré de champion',500,'v258-gold']
+   ['gold','👑','Or','Chrono doré de champion',500,'v258-gold'],
+   ['galaxy','🌌','Galaxy','Chrono cosmique ultra rare',2000,'v259-galaxy'],
+   ['inferno','🔥','Inferno','Chrono rouge incandescent',5000,'v259-inferno']
   ],
   effect:[
    ['none','☆','Aucun','Effet désactivé',0,''],
    ['spark','✨','Étincelles','Petites étincelles après un gros score',200,''],
    ['confetti','🎉','Confettis','Pluie de confettis après une réussite',300,''],
-   ['nova','💥','Super Nova','Explosion visuelle après une réussite',400,'']
+   ['nova','💥','Super Nova','Explosion visuelle après une réussite',400,''],
+   ['lightning','⚡','Éclair','Décharge électrique après une réussite',1000,''],
+   ['crown','👑','Couronne','Effet prestige de champion',2500,'']
   ],
   frame:[
    ['none','◯','Aucun','Cadre par défaut',0,''],
    ['bronze','🥉','Bronze','Cadre bronze',100,''],
    ['gold','🥇','Or','Cadre doré',300,''],
    ['diamond','💎','Diamant','Cadre bleu brillant',500,''],
-   ['legend','👑','Légende','Cadre violet premium',800,'']
+   ['legend','👑','Légende','Cadre violet premium',800,''],
+   ['champion','🏆','Champion','Cadre prestige très rare',2000,''],
+   ['top1','🥇','TOP 1','Réservé aux joueurs ayant atteint une 1re place',0,'']
   ]
  };
- function owned(type,id){return id==='classic'||id==='none'||LS.getItem('psShop_'+type+'_'+id)==='1'}
+ function owned(type,id){
+   if(id==='top1')return LS.getItem('psAchievementTop1')==='1';
+   return id==='classic'||id==='none'||LS.getItem('psShop_'+type+'_'+id)==='1'
+ }
  function equipped(type){return LS.getItem('psEquip_'+type)||(type==='theme'?'classic':'none')}
  function apply(){
    [...document.body.classList].filter(c=>c.startsWith('v258theme-')||c.startsWith('v258frame-')).forEach(c=>document.body.classList.remove(c));
@@ -2266,11 +2301,12 @@ body.v258frame-legend #v234Profile .v234panel{border:2px solid #b95cff!important
  function render(type){
    $('v258Items').innerHTML=defs[type].map(([id,ico,name,desc,price,cls])=>{
      const own=owned(type,id),eq=equipped(type)===id;
-     const label=eq?'ÉQUIPÉ':own?'ÉQUIPER':price+' 🪙';
+     const special=(id==='top1'&&!own);
+     const label=eq?'ÉQUIPÉ':own?'ÉQUIPER':special?'🔒 TOP 1':price+' 🪙';
      return `<div class="v258item">
        <div class="v258preview ${cls}">${ico}</div>
        <div><b>${name}</b><small>${desc}</small></div>
-       <button class="v258buy ${own&&!eq?'equip':''}" data-type="${type}" data-id="${id}" data-price="${price}" ${eq?'disabled':''}>${label}</button>
+       <button class="v258buy ${own&&!eq?'equip':''}" data-type="${type}" data-id="${id}" data-price="${price}" ${(eq||special)?'disabled':''}>${label}</button>
      </div>`
    }).join('');
    $('v258Items').querySelectorAll('.v258buy').forEach(b=>b.onclick=()=>{
@@ -2311,7 +2347,11 @@ body.v258frame-legend #v234Profile .v234panel{border:2px solid #b95cff!important
  // Cosmetic success effects.
  function burst(kind){
    const root=$('v258Fx');if(!root)return;
-   const chars=kind==='spark'?['✨','✦','✨']:kind==='confetti'?['🎉','🔸','🔹','🟡','🟣']:['💥','✨','🌟','💫'];
+   const chars=kind==='spark'?['✨','✦','✨']:
+     kind==='confetti'?['🎉','🔸','🔹','🟡','🟣']:
+     kind==='lightning'?['⚡','⚡','✨','⚡']:
+     kind==='crown'?['👑','✨','🏆','👑']:
+     ['💥','✨','🌟','💫'];
    for(let i=0;i<(kind==='nova'?18:12);i++){
      const e=document.createElement('span');e.textContent=chars[i%chars.length];
      e.style.left=(20+Math.random()*60)+'%';e.style.top=(55+Math.random()*20)+'%';
