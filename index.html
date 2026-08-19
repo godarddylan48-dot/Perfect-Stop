@@ -2115,11 +2115,6 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
  },true);
 
  // Also add replay selector directly on play screen near main button.
- const mainBtn=$('btn');
- if(mainBtn && !q('v252ReplayBtn')){
-   const r=document.createElement('button');r.id='v252ReplayBtn';r.textContent='🗺️ REJOUER UN NIVEAU DÉBLOQUÉ';
-   r.onclick=openReplay;mainBtn.insertAdjacentElement('afterend',r);
- }
  window.openReplayLevels=openReplay;
 })();
 </script>
@@ -2140,6 +2135,15 @@ body.v253-running #v252ReplayBtn{display:none!important}
   const watch=setInterval(syncReplayButton,100);
   window.addEventListener('beforeunload',()=>clearInterval(watch));
   syncReplayButton();
+})();
+</script>
+
+
+<script id="v254-menu-only">
+(()=>{
+ const clean=()=>{const b=document.getElementById('v252ReplayBtn'); if(b)b.remove();};
+ clean();
+ new MutationObserver(clean).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
 
