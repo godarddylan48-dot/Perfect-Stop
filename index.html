@@ -561,4 +561,39 @@ body.v16-diamond .btn{box-shadow:0 0 25px #9ce8ff44}
 })();
 </script>
 
+
+<style id="v171-fix">
+/* V17.1 mobile layout fix */
+#v15Home{overflow-x:hidden}
+.v15card{width:min(92vw,430px)!important;max-width:430px}
+.v15logo{font-size:34px;line-height:1.02}
+.v15logo small{font-size:10px!important;letter-spacing:1.5px!important}
+#v17Season{font-size:11px!important;margin:10px 0 4px!important}
+.v15sub{font-size:15px;margin:8px 0 18px!important;white-space:normal}
+.v15rank{margin-bottom:10px!important}
+#v17Road{width:100%;margin:0 0 12px!important;padding:12px!important}
+#v17RoadTop{display:flex!important;flex-direction:column;align-items:flex-start!important;gap:4px}
+#v17RoadTop span:last-child{align-self:flex-end;margin-top:-22px}
+.v15play{margin-top:0}
+.v15grid{grid-template-columns:1fr 1fr!important}
+@media(max-width:390px){
+ .v15logo{font-size:30px}
+ .v15grid{gap:8px}
+ .v15btn{font-size:13px;padding:13px 8px}
+ .v15play{font-size:22px;padding:18px}
+}
+</style>
+<script id="v171-fix-script">
+(()=>{
+ const q=s=>document.querySelector(s);
+ const small=q('.v15logo small');
+ if(small) small.textContent='VERSION 17.1 • COMPÉTITION';
+ const road=q('#v17Road');
+ const rank=q('.v15rank');
+ if(road && rank && road.previousElementSibling!==rank){
+   rank.insertAdjacentElement('afterend',road);
+ }
+})();
+</script>
+
 </body></html>
