@@ -325,11 +325,7 @@ draw();ensurePlayer();
   <div class="v181rank"><span>🏅 <b id="v181League">BRONZE</b></span><span>🪙 <b id="v181Coins">0</b></span></div>
   <div class="v181road"><div class="v181roadtop"><span id="v181Path">Parcours #1</span><b id="v181Boss">Boss #5</b></div><div class="v181bar"><i id="v181Fill"></i></div></div>
   
-<div class="sudden-card">
-  <div class="sc-title">⚡ MORT SUBITE</div>
-  <div class="sc-sub">Enchaîne les cibles. Une grosse erreur et ta série s'arrête.</div>
-  <button type="button" onclick="openSuddenDeath()">JOUER EN MORT SUBITE</button>
-</div>
+
 <button class="v181play" id="v181Play">▶ JOUER</button>
   <div class="v181grid"><button class="v181btn" data-v181="missions">🎯 MISSIONS</button><button class="v181btn" data-v181="profile">📊 PROFIL</button><button class="v181btn" data-v181="levels">🗺️ NIVEAUX</button><button class="v181btn" data-v181="rewards">🏆 RÉCOMPENSES</button></div>
  </div>
@@ -1797,6 +1793,39 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
   .v181btn{padding:11px 6px!important;font-size:12px!important;border-radius:14px!important}
 }
 </style>
+
+<script id="v244-home-clean">
+(()=>{
+ const q=s=>document.querySelector(s);
+ const grid=q('.v181grid');
+ if(grid && !q('#v244SuddenBtn')){
+   const b=document.createElement('button');
+   b.id='v244SuddenBtn';
+   b.className='v181btn';
+   b.textContent='⚡ MORT SUBITE';
+   b.onclick=()=>window.openSuddenDeath&&window.openSuddenDeath();
+   const first=grid.children[0];
+   if(first) grid.insertBefore(b, first); else grid.appendChild(b);
+ }
+ // Make the grid 3 columns on wider phones and 2 columns on narrow screens.
+ const st=document.createElement('style');
+ st.textContent=`
+   .v181grid{grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+   .v181btn{padding:13px 6px!important;font-size:12px!important}
+   @media(max-width:390px){.v181grid{grid-template-columns:repeat(2,1fr)!important}}
+   @media(max-height:780px){
+     .v181logo{font-size:30px!important}
+     .v181ver{margin:5px 0!important}
+     .v181sub{margin-bottom:8px!important}
+     .v181rank,.v181road,#v19Daily,.v241kinghome{margin:6px 0!important}
+     .v181play{margin:8px 0!important;padding:16px!important}
+   }`;
+ document.head.appendChild(st);
+ const ver=q('.v181ver');
+ if(ver)ver.textContent='VERSION 24.4 • ACCUEIL ÉPURÉ';
+})();
+</script>
+
 </body></html>
 <style id="v238-continuous-style">
 #v19BossHud{display:none!important}
@@ -1885,7 +1914,7 @@ font-size:11px;font-weight:900;letter-spacing:.5px;background:rgba(255,255,255,.
    q('.v181play')?.insertAdjacentElement('beforebegin',box);
  }
  setTimeout(homeKing,500);
- function version(){const v=q('.v181ver');if(v)v.textContent='VERSION 24.3 • MORT SUBITE COMPACTE'}
+ function version(){const v=q('.v181ver');if(v)v.textContent='VERSION 24.4 • ACCUEIL ÉPURÉ'}
  setTimeout(version,100);setTimeout(version,1400);
 })();
 </script>
