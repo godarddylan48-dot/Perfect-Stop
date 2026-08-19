@@ -1458,4 +1458,75 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
 })();
 </script>
 
+
+<style id="v237-close-fix">
+/* Kill previous persistent close buttons */
+#v235ChallengeClose,#v236OverlayClose{display:none!important}
+#v237Close{
+ position:fixed;
+ top:calc(env(safe-area-inset-top) + 14px);
+ right:16px;
+ z-index:300000;
+ width:44px;height:44px;border:1px solid #ffffff18;border-radius:50%;
+ background:#0d1328ee;color:#fff;font-size:24px;
+ display:none;align-items:center;justify-content:center;
+ box-shadow:0 8px 24px #0008
+}
+#v237Close.on{display:flex}
+</style>
+
+<button id="v237Close" aria-label="Fermer">×</button>
+
+<script id="v237-script">
+(()=>{
+ const q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ // Remove the old injected close buttons entirely.
+ q('#v235ChallengeClose')?.remove();
+ q('#v236OverlayClose')?.remove();
+ document.body.classList.remove('v235-challenge-open','v236-overlay-open');
+
+ const btn=q('#v237Close');
+ const sheet=q('#v181Sheet');
+
+ function isMissionOrChallengeOpen(){
+   if(!sheet) return false;
+   const cs=getComputedStyle(sheet);
+   const visible = sheet.classList.contains('on') && cs.display!=='none' && cs.visibility!=='hidden';
+   if(!visible) return false;
+   const txt=(sheet.innerText||'').toLowerCase();
+   return txt.includes('missions') || txt.includes('défis') || txt.includes('connexion 7 jours') || txt.includes('jouer 5 parties');
+ }
+
+ function refresh(){
+   btn.classList.toggle('on',isMissionOrChallengeOpen());
+ }
+
+ function closeSheet(){
+   if(sheet){
+     sheet.classList.remove('on','show','open');
+     sheet.style.display='';
+   }
+   btn.classList.remove('on');
+ }
+ btn.onclick=closeSheet;
+
+ // Bottom navigation always hides the special close button.
+ qa('[data-v22]').forEach(b=>{
+   b.addEventListener('click',()=>{
+     btn.classList.remove('on');
+     if(sheet) sheet.classList.remove('on','show','open');
+   },true);
+ });
+
+ // Observe only the actual sheet state, not the whole page text.
+ if(sheet){
+   new MutationObserver(refresh).observe(sheet,{attributes:true,attributeFilter:['class','style'],subtree:true,childList:true,characterData:true});
+ }
+ setInterval(refresh,500);
+
+ const ver=q('.v181ver');
+ if(ver)ver.textContent='VERSION 23.7 • CROIX CORRIGÉE';
+})();
+</script>
+
 </body></html>
