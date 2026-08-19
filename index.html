@@ -596,4 +596,149 @@ body.v16-diamond .btn{box-shadow:0 0 25px #9ce8ff44}
 })();
 </script>
 
+
+<style id="v18-style">
+/* PERFECT STOP V18 — content update */
+.v18-next{font-size:12px;color:#ffd45b;font-weight:900}
+.v18-sub{font-size:10px;color:#ffffff66;margin-top:3px}
+.v18-box{background:#ffffff07;border:1px solid #ffffff10;border-radius:15px;padding:13px;margin:9px 0;text-align:left}
+.v18-box strong{display:block;font-size:15px}
+.v18-chip{display:inline-block;margin-top:7px;padding:5px 8px;border-radius:999px;background:#ffffff0d;font-size:10px}
+.v18-boss{border-color:#ffb32955;background:linear-gradient(135deg,#3a180b44,#ffffff05)}
+.v18-special{border-color:#56d6ff44;background:linear-gradient(135deg,#0c2f3c44,#ffffff05)}
+.v18-reward{display:flex;justify-content:space-between;align-items:center;background:#ffffff08;border:1px solid #ffffff10;border-radius:13px;padding:12px;margin:8px 0}
+.v18-progress{height:8px;background:#ffffff12;border-radius:999px;overflow:hidden;margin-top:8px}
+.v18-progress i{display:block;height:100%;background:linear-gradient(90deg,#ff9b16,#ffd25a);border-radius:999px}
+.v18-banner{margin:8px 0 12px;padding:10px 12px;border-radius:14px;background:#ffffff08;border:1px solid #ffffff10;text-align:left}
+.v18-banner b{color:#ffd45b}
+</style>
+<script id="v18-features">
+(()=>{
+ const LS=localStorage,q=s=>document.querySelector(s),qa=s=>[...document.querySelectorAll(s)];
+ const num=(k,d=0)=>+(LS.getItem(k)||d), put=(k,v)=>LS.setItem(k,v);
+ const cycle=()=>Math.max(1,num('psV17Cycle',1));
+ const stage=()=>Math.max(1,num('psLevel',1));
+ const worldLevel=()=>((cycle()-1)*5)+stage();
+ const bossEvery=5;
+ const bossLevel=()=>Math.ceil(worldLevel()/bossEvery)*bossEvery;
+ const variantFor=lv=>{
+   if(lv%5===0)return {name:'BOSS TRIPLE',ico:'👑',desc:'3 réussites consécutives',boss:true};
+   const arr=[
+     {name:'CLASSIQUE',ico:'🎯',desc:'Chrono visible'},
+     {name:'DISPARITION',ico:'👻',desc:'Le chrono disparaît'},
+     {name:'MÉMOIRE',ico:'🧠',desc:'Observe puis mémorise'},
+     {name:'CIBLE RANDOM',ico:'🎲',desc:'Objectif aléatoire'},
+     {name:'AVEUGLE',ico:'🌑',desc:'Aucun chrono visible'},
+     {name:'RUSH',ico:'⚡',desc:'Cible plus courte'},
+     {name:'DOUBLE',ico:'✌️',desc:'Deux arrêts à réussir'},
+     {name:'MIROIR',ico:'🪞',desc:'Piège visuel'},
+     {name:'SUDDEN DEATH',ico:'💀',desc:'Un seul essai'}
+   ];
+   return arr[(lv-1)%arr.length];
+ };
+ const difficulty=lv=>{
+   const tier=Math.floor((lv-1)/5);
+   return Math.max(.045,.20-tier*.012);
+ };
+ const rewardFor=lv=>20+Math.floor(lv/5)*5;
+ const meta=()=>{let m={coins:0};try{m={...m,...JSON.parse(LS.perfectStopV14||'{}')}}catch(e){}return m};
+ const saveMeta=m=>LS.perfectStopV14=JSON.stringify(m);
+ const toast=t=>{
+   let p=q('#v17Pop'); if(!p){p=document.createElement('div');p.id='v17Pop';p.className='v17-pop';document.body.appendChild(p)}
+   p.innerHTML=t;p.classList.remove('go');void p.offsetWidth;p.classList.add('go')
+ };
+
+ // Clean duplicate rank on road and replace by next boss info.
+ const refreshRoad=()=>{
+   const rt=q('#v17RoadTop'); if(!rt)return;
+   const v=variantFor(worldLevel());
+   rt.innerHTML=`<span>${v.ico} Parcours <b>#${worldLevel()}</b> • ${v.name}</span><span class="v18-next">Boss #${bossLevel()}</span>`;
+ };
+ refreshRoad();
+
+ // Add a compact next-objective banner under the road.
+ const road=q('#v17Road');
+ if(road && !q('#v18Banner')){
+   road.insertAdjacentHTML('afterend',`<div id="v18Banner" class="v18-banner"></div>`);
+ }
+ const refreshBanner=()=>{
+   const b=q('#v18Banner');if(!b)return;
+   const lv=worldLevel(),v=variantFor(lv),tol=difficulty(lv),rew=rewardFor(lv);
+   b.innerHTML=`<b>${v.ico} ${v.name}</b><div class="v18-sub">${v.desc} • objectif ≤ ${tol.toFixed(3)}s • récompense ${rew} 🪙</div>`;
+ };
+ refreshBanner();
+
+ // Expand levels/content sheet.
+ qa('[data-v15="levels"]').forEach(btn=>btn.addEventListener('click',()=>{
+   setTimeout(()=>{
+     const c=q('#v15Content'); if(!c)return;
+     const lv=worldLevel();
+     const upcoming=[];
+     for(let i=lv;i<lv+6;i++){
+       const v=variantFor(i);
+       upcoming.push(`<div class="v18-box ${v.boss?'v18-boss':'v18-special'}"><strong>${v.ico} Parcours #${i} • ${v.name}</strong><small>${v.desc}</small><span class="v18-chip">Objectif ≤ ${difficulty(i).toFixed(3)}s</span></div>`)
+     }
+     c.insertAdjacentHTML('afterbegin',`<div class="v18-box"><strong>♾️ PROCHAINS PARCOURS</strong><small>La difficulté augmente tous les 5 parcours. Les Boss reviennent régulièrement.</small></div>${upcoming.join('')}`)
+   },0)
+ }));
+
+ // Reward milestones that are actually claimable.
+ const milestoneDefs=()=>[
+   {id:'p10',need:10,reward:50,label:'Atteindre le parcours 10'},
+   {id:'p20',need:20,reward:100,label:'Atteindre le parcours 20'},
+   {id:'p35',need:35,reward:175,label:'Atteindre le parcours 35'},
+   {id:'p50',need:50,reward:300,label:'Atteindre le parcours 50'}
+ ];
+ let claimed={};try{claimed=JSON.parse(LS.psV18Claims||'{}')}catch(e){}
+ const saveClaims=()=>LS.psV18Claims=JSON.stringify(claimed);
+
+ qa('[data-v15="rewards"]').forEach(btn=>btn.addEventListener('click',()=>{
+   setTimeout(()=>{
+     const c=q('#v15Content'); if(!c)return;
+     const lv=worldLevel();
+     const blocks=milestoneDefs().map(m=>{
+       const done=lv>=m.need,cl=claimed[m.id];
+       return `<div class="v18-reward"><div><b>${done?'✅':'🔒'} ${m.label}</b><div class="v18-sub">+${m.reward} pièces</div></div><button class="v16-claim" data-v18claim="${m.id}" ${(!done||cl)?'disabled':''}>${cl?'RÉCUPÉRÉ':'RÉCUPÉRER'}</button></div>`
+     }).join('');
+     c.insertAdjacentHTML('afterbegin',`<div class="v18-box"><strong>🎁 PALIERS DE PARCOURS</strong><small>Plus tu avances, plus tu débloques de pièces.</small></div>${blocks}`)
+   },0)
+ }));
+
+ q('#v15Content')?.addEventListener('click',e=>{
+   const b=e.target.closest('[data-v18claim]'); if(!b)return;
+   const d=milestoneDefs().find(x=>x.id===b.dataset.v18claim); if(!d||claimed[d.id]||worldLevel()<d.need)return;
+   const m=meta();m.coins=(m.coins||0)+d.reward;saveMeta(m);claimed[d.id]=true;saveClaims();toast(`🎁 +${d.reward} 🪙`);
+   b.disabled=true;b.textContent='RÉCUPÉRÉ';
+ });
+
+ // Boss progression logic: boss requires 3 consecutive successes.
+ let bossStreak=num('psV18BossStreak',0),lastA=num('psTotalAttempts'),lastW=num('psTotalWins');
+ setInterval(()=>{
+   const a=num('psTotalAttempts'),w=num('psTotalWins');
+   if(a>lastA){
+     const lv=worldLevel(),isBoss=lv%5===0;
+     if(w>lastW){
+       if(isBoss){
+         bossStreak++;put('psV18BossStreak',bossStreak);
+         toast(`👑 BOSS ${bossStreak}/3`);
+         if(bossStreak>=3){
+           bossStreak=0;put('psV18BossStreak',0);
+           const m=meta(),gain=rewardFor(lv)*3;m.coins=(m.coins||0)+gain;saveMeta(m);
+           toast(`🏆 BOSS VAINCU • +${gain} 🪙`);
+         }
+       }else{
+         const m=meta(),gain=rewardFor(lv);m.coins=(m.coins||0)+gain;saveMeta(m);
+       }
+     } else if(isBoss){
+       bossStreak=0;put('psV18BossStreak',0);toast('💀 Boss raté • série remise à zéro');
+     }
+     lastA=a;lastW=w;refreshRoad();refreshBanner();
+   }
+ },350);
+
+ // Home subtitle/version.
+ const small=q('.v15logo small'); if(small)small.textContent='VERSION 18 • PARCOURS INFINI';
+})();
+</script>
+
 </body></html>
