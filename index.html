@@ -32,6 +32,38 @@ body{background:radial-gradient(circle at 50% 7%,#263763,#080a13 62%);color:#fff
 @keyframes flash{0%{filter:brightness(1)}45%{filter:brightness(1.8)}100%{filter:brightness(1)}}@keyframes shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-5px)}60%{transform:translateX(5px)}}
 .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:20}.confetti i{position:absolute;top:-20px;width:8px;height:14px;background:#fff;animation:fall 1.8s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.7}}
 @media(max-height:700px){.timer{margin:5px 0}.result{min-height:40px}.metarow{display:none}.board{font-size:9px}.progressText{display:none}}
+
+/* === V24.2 : MODE MORT SUBITE === */
+.sudden-card{
+  margin:16px 28px 4px;padding:16px 18px;border:1px solid rgba(255,92,92,.25);
+  border-radius:22px;background:linear-gradient(135deg,rgba(120,0,0,.22),rgba(10,14,45,.55));
+  box-shadow:0 0 24px rgba(255,40,40,.05)
+}
+.sudden-card .sc-title{font-weight:900;font-size:19px}
+.sudden-card .sc-sub{opacity:.78;font-size:13px;margin-top:4px}
+.sudden-card button,.sudden-btn{
+  width:100%;margin-top:12px;border:0;border-radius:15px;padding:13px 12px;
+  font-weight:900;font-size:16px;color:white;background:linear-gradient(90deg,#7d0000,#d31c1c);
+}
+#suddenOverlay{
+  display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at top,#121a58,#01040f 55%);
+  color:white;overflow:auto;padding:24px 18px 90px;text-align:center
+}
+#suddenOverlay.active{display:block}
+.sudden-wrap{max-width:560px;margin:0 auto}
+.sudden-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sudden-close{border:0;background:rgba(255,255,255,.08);color:#fff;border-radius:50%;width:42px;height:42px;font-size:24px}
+.sudden-badge{font-size:14px;font-weight:800;opacity:.85}
+.sudden-target{margin:44px 0 4px;font-size:18px;opacity:.75}
+#suddenTarget{font-size:54px;font-weight:1000;letter-spacing:-2px}
+#suddenTimer{font-size:62px;font-weight:1000;margin:28px 0 22px;font-variant-numeric:tabular-nums}
+#suddenStop{width:100%;padding:22px;border:0;border-radius:22px;font-size:30px;font-weight:1000;color:#fff;background:linear-gradient(90deg,#8e0000,#ef2b2b)}
+.sudden-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+.sudden-stat{padding:14px 6px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.035)}
+.sudden-stat b{display:block;font-size:22px}
+#suddenMsg{min-height:55px;margin:20px 0 0;font-size:18px;font-weight:800}
+#suddenNext{display:none}
+
 </style></head><body>
 <main class="w" id="app">
 <div class="top"><b>PERFECT STOP</b><span class="rankchip" id="rankChip">BRONZE • 0 XP</span><span><button class="iconbtn" id="soundBtn">🔊</button> <button class="iconbtn" id="statsBtn">📊</button> 🏆 <b id="points">0</b></span></div>
@@ -292,7 +324,13 @@ draw();ensurePlayer();
   <div class="v181sub">Précision • Réflexes • Classement</div>
   <div class="v181rank"><span>🏅 <b id="v181League">BRONZE</b></span><span>🪙 <b id="v181Coins">0</b></span></div>
   <div class="v181road"><div class="v181roadtop"><span id="v181Path">Parcours #1</span><b id="v181Boss">Boss #5</b></div><div class="v181bar"><i id="v181Fill"></i></div></div>
-  <button class="v181play" id="v181Play">▶ JOUER</button>
+  
+<div class="sudden-card">
+  <div class="sc-title">⚡ MORT SUBITE</div>
+  <div class="sc-sub">Enchaîne les cibles. Une grosse erreur et ta série s'arrête.</div>
+  <button type="button" onclick="openSuddenDeath()">JOUER EN MORT SUBITE</button>
+</div>
+<button class="v181play" id="v181Play">▶ JOUER</button>
   <div class="v181grid"><button class="v181btn" data-v181="missions">🎯 MISSIONS</button><button class="v181btn" data-v181="profile">📊 PROFIL</button><button class="v181btn" data-v181="levels">🗺️ NIVEAUX</button><button class="v181btn" data-v181="rewards">🏆 RÉCOMPENSES</button></div>
  </div>
 </div>
@@ -1657,6 +1695,92 @@ body.v236-overlay-open #v236OverlayClose{display:flex}
 })();
 </script>
 
+
+<div id="suddenOverlay" aria-hidden="true">
+  <div class="sudden-wrap">
+    <div class="sudden-top">
+      <div style="text-align:left">
+        <div style="font-size:27px;font-weight:1000">⚡ MORT SUBITE</div>
+        <div class="sudden-badge">Une erreur au-dessus de la limite = éliminé</div>
+      </div>
+      <button class="sudden-close" onclick="closeSuddenDeath()">×</button>
+    </div>
+    <div class="sudden-target">ARRÊTE LE TEMPS À</div>
+    <div id="suddenTarget">5.000</div>
+    <div id="suddenTimer">0.000</div>
+    <button id="suddenStop" onclick="suddenStop()">STOP</button>
+    <div class="sudden-stats">
+      <div class="sudden-stat"><b id="suddenRound">1</b><span>MANCHE</span></div>
+      <div class="sudden-stat"><b id="suddenLimit">0.500s</b><span>LIMITE</span></div>
+      <div class="sudden-stat"><b id="suddenBest">0</b><span>RECORD</span></div>
+    </div>
+    <div id="suddenMsg">Appuie sur STOP au plus près de la cible.</div>
+    <button id="suddenNext" class="sudden-btn" onclick="suddenNextRound()">MANCHE SUIVANTE ⚡</button>
+  </div>
+</div>
+<script>
+(function(){
+  let sdStart=0, sdRAF=0, sdRunning=false, sdRound=1, sdTarget=5, sdLimit=.5;
+  const targets=[5,7.5,3.33,8.88,4.2,6.66,2.5,9.25,1.75,7.77,4.44,9.99];
+  function el(id){return document.getElementById(id)}
+  function best(){return Number(localStorage.getItem("perfectStopSuddenBest")||0)}
+  function setBest(v){if(v>best())localStorage.setItem("perfectStopSuddenBest",String(v))}
+  function difficulty(){
+    sdTarget=targets[(sdRound-1)%targets.length];
+    sdLimit=Math.max(.055,.50-(sdRound-1)*.045);
+    el("suddenTarget").textContent=sdTarget.toFixed(sdTarget%1?2:3);
+    el("suddenRound").textContent=sdRound;
+    el("suddenLimit").textContent=sdLimit.toFixed(3)+"s";
+    el("suddenBest").textContent=best();
+  }
+  function tick(t){
+    if(!sdRunning)return;
+    const sec=(t-sdStart)/1000;
+    el("suddenTimer").textContent=sec.toFixed(3);
+    if(sec>sdTarget+2.25){window.suddenStop();return}
+    sdRAF=requestAnimationFrame(tick);
+  }
+  window.openSuddenDeath=function(){
+    el("suddenOverlay").classList.add("active");
+    el("suddenOverlay").setAttribute("aria-hidden","false");
+    sdRound=1; difficulty(); start();
+  };
+  window.closeSuddenDeath=function(){
+    sdRunning=false;cancelAnimationFrame(sdRAF);
+    el("suddenOverlay").classList.remove("active");
+    el("suddenOverlay").setAttribute("aria-hidden","true");
+  };
+  function start(){
+    el("suddenNext").style.display="none";
+    el("suddenStop").disabled=false;
+    el("suddenStop").style.opacity="1";
+    el("suddenMsg").textContent="Manche "+sdRound+" — sois précis.";
+    el("suddenTimer").textContent="0.000";
+    sdRunning=true;sdStart=performance.now();sdRAF=requestAnimationFrame(tick);
+  }
+  window.suddenStop=function(){
+    if(!sdRunning)return;
+    sdRunning=false;cancelAnimationFrame(sdRAF);
+    const value=(performance.now()-sdStart)/1000;
+    el("suddenTimer").textContent=value.toFixed(3);
+    const gap=Math.abs(value-sdTarget);
+    el("suddenStop").disabled=true;el("suddenStop").style.opacity=".55";
+    if(gap<=sdLimit){
+      setBest(sdRound);
+      el("suddenBest").textContent=best();
+      el("suddenMsg").textContent="✅ "+gap.toFixed(3)+"s d'écart — QUALIFIÉ !";
+      el("suddenNext").style.display="block";
+    }else{
+      el("suddenMsg").innerHTML="💀 ÉLIMINÉ — "+gap.toFixed(3)+"s d'écart<br><small>Record : "+best()+" manche(s)</small>";
+      el("suddenNext").textContent="RECOMMENCER ⚡";
+      el("suddenNext").style.display="block";
+      el("suddenNext").onclick=function(){sdRound=1;difficulty();this.textContent="MANCHE SUIVANTE ⚡";this.onclick=window.suddenNextRound;start()};
+    }
+  };
+  window.suddenNextRound=function(){sdRound++;difficulty();start()};
+})();
+</script>
+
 </body></html>
 <style id="v238-continuous-style">
 #v19BossHud{display:none!important}
@@ -1745,7 +1869,7 @@ font-size:11px;font-weight:900;letter-spacing:.5px;background:rgba(255,255,255,.
    q('.v181play')?.insertAdjacentElement('beforebegin',box);
  }
  setTimeout(homeKing,500);
- function version(){const v=q('.v181ver');if(v)v.textContent='VERSION 24.1 • ROI DU JOUR & DUELS+'}
+ function version(){const v=q('.v181ver');if(v)v.textContent='VERSION 24.2 • MORT SUBITE'}
  setTimeout(version,100);setTimeout(version,1400);
 })();
 </script>
